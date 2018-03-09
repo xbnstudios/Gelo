@@ -25,7 +25,7 @@ Although the system will initially only handle track data, its design
 accommodates expansion into other types of markers and into other types of
 sinks, should XBN decide to expand the scope of the project in the future.
 
-For more information about the design of the application, look in `docs/design`.
+For more information about the design of the application, look in `doc/design`.
 
 
 ## Usage
