@@ -9,6 +9,9 @@ setup(
     author='s0ph0s-2',
     license='GPL',
     packages=[ 'gelo', ],
+    install_requires=[
+        'yapsy',
+    ],
     entry_points={
         'console_scripts': [ "gelo = gelo.command_line:main" ]
     },

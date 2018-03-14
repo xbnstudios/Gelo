@@ -40,7 +40,7 @@ class IMarkerSource(Thread):
 
 class IMarkerSink(Thread):
     """An interface defining the required methods of a marker sink."""
-    
+
     def __init__(self, config, mediator: IMediator):
         """Create a new marker sink."""
         self.config = config

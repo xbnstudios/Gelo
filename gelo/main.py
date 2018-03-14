@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 """Gelo: a podcast chapter metadata gathering tool"""
-import argparse
+from yapsy.PluginManager import PluginManager
 
-def main():
-    """The main function for Gelo, which parses args and starts everything up.
-    Uses argparse on the argument list, try --help"""
+BUILTIN_PLUGIN_DIR = './plugins'
 
-    parser = argparse.ArgumentParser(prog='gelo')
-    parser.add_argument('show',
-                        help='the slug and episode number of the show, like fnt-192')
-    parser.add_argument('-c',
-                        '--config',
-                        default='gelo.ini',
-                        type=open,
-                        help='alternate configuration file')
-    parser.parse_args()
+def main(configuration):
+    """Use the provided configuration to load all plugins and run Gelo."""
 
-    print("Sorry, this doesn't do anything yet.")
+    pm = PluginManager()
+    pm.setPluginPlaces([BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir])
+
+    print("Plugins with configurations:", configuration.plugins)
