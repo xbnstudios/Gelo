@@ -1,0 +1,9 @@
+[Core]
+Name = Audacity Labels
+Module = audacity_labels
+   
+[Documentation]
+Description = Create an Audacity label file from the markers.
+Author = s0ph0s
+Version = 0.1.0
+Website = https://github.com/s0ph0s-2/Gelo

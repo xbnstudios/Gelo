@@ -1,0 +1,9 @@
+[Code]
+Name = Icecast
+Module = icecast.py
+
+[Documentation]
+Description = Fork an Icecast server in order to capture chapter marks
+Author = s0ph0s
+Version = 0.1.0
+Website = https://github.com/s0ph0s-2/Gelo

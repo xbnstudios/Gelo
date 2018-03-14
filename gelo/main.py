@@ -2,7 +2,7 @@
 """Gelo: a podcast chapter metadata gathering tool"""
 from yapsy.PluginManager import PluginManager
 
-BUILTIN_PLUGIN_DIR = './plugins'
+BUILTIN_PLUGIN_DIR = './gelo/plugins'
 
 def main(configuration):
     """Use the provided configuration to load all plugins and run Gelo."""
