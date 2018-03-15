@@ -9,7 +9,8 @@ class Configuration(object):
     """A configuration for Gelo.
     I split this out to reduce coupling between Gelo and ConfigParser."""
 
-    def __init__(self, config_file: configparser.ConfigParser, args: argparse.Namespace):
+    def __init__(self, config_file: configparser.ConfigParser,
+                 args: argparse.Namespace):
         """Create a Configuration."""
         validity = self.validate_config_file(config_file)
         if not validity[0]:
@@ -23,13 +24,15 @@ class Configuration(object):
                         plugin.startswith('plugin:')]
         self.configparser = config_file
 
-    def validate_config_file(self, config_file: configparser.ConfigParser) -> StatusTuple:
+    @staticmethod
+    def validate_config_file(config_file: configparser.ConfigParser) ->\
+            StatusTuple:
         """Check to see if the configuration file is valid.
         This is currently probably inadequate. It just looks for the [core]
         section."""
         if 'core' not in config_file:
-            return (False, 'Required config section [core] missing.')
-        return (True, 'Configuration file valid.')
+            return False, 'Required config section [core] missing.'
+        return True, 'Configuration file valid.'
 
 
 class InvalidConfigurationError(Exception):

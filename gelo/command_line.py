@@ -4,6 +4,7 @@ import argparse
 import configparser
 import os
 
+
 def main():
     """Parse the command line arguments into a Gelo configuration."""
     # Construct the parser

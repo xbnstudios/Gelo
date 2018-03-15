@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
-import threading
+from threading import Thread
 from enum import Enum
+
+
+class MarkerType(Enum):
+    """Types of markers.
+    TRACK is a song played over the air.
+    TOPIC is a topic of conversation, be it an article or otherwise.
+    """
+    TRACK = 1
+    TOPIC = 2
+
+
+class IMarkerSink:
+    """Just define it so that the type hint interprets."""
+    pass
+
 
 class IMediator:
     """A middle layer that accepts events from sources and sends them to sinks.
@@ -30,6 +45,7 @@ class IMarkerSource(Thread):
 
     def __init__(self, config, mediator: IMediator):
         """Create a new marker source."""
+        super().__init__()
         self.config = config
         self.mediator = mediator
 
@@ -44,6 +60,7 @@ class IMarkerSink(Thread):
 
     def __init__(self, config, mediator: IMediator):
         """Create a new marker sink."""
+        super().__init__()
         self.config = config
         self.mediator = mediator
 
@@ -52,19 +69,10 @@ class IMarkerSink(Thread):
         This creates a thread."""
         pass
 
-    def notify(self, event_type, event_msg: str, timestamp):
+    def notify(self, event_type: MarkerType, event_msg: str):
         """The function that the Mediator will call to give this sink an event.
         :event_type: The type of the event
         :event_msg: The event string
         :timestamp: How long it's been (wall-clock time) since the first marker
         """
         pass
-
-
-class MarkerType(Enum):
-    """Types of markers.
-    TRACK is a song played over the air.
-    TOPIC is a topic of conversation, be it an article or otherwise.
-    """
-    TRACK = 1
-    TOPIC = 2
