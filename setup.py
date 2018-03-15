@@ -11,6 +11,7 @@ setup(
     packages=[ 'gelo', ],
     install_requires=[
         'yapsy',
+        'requests',
     ],
     entry_points={
         'console_scripts': [ "gelo = gelo.command_line:main" ]

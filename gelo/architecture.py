@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import threading
+from enum import Enum
 
 class IMediator:
     """A middle layer that accepts events from sources and sends them to sinks.
@@ -58,3 +59,12 @@ class IMarkerSink(Thread):
         :timestamp: How long it's been (wall-clock time) since the first marker
         """
         pass
+
+
+class MarkerType(Enum):
+    """Types of markers.
+    TRACK is a song played over the air.
+    TOPIC is a topic of conversation, be it an article or otherwise.
+    """
+    TRACK = 1
+    TOPIC = 2

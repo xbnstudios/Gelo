@@ -34,3 +34,13 @@ class Configuration(object):
 
 class InvalidConfigurationError(Exception):
     """Used to indicate that the configuration is invalid."""
+
+
+def is_int(value: str) -> bool:
+    """Check to see if the value passed is an integer."""
+    try:
+        int(value)
+    except ValueError:
+        return False
+    else:
+        return True
