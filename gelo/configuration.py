@@ -20,8 +20,8 @@ class Configuration(object):
             self.user_plugin_dir = config_file['core']['user_plugin_dir']
         if args.user_plugin_dir != '':
             self.user_plugin_dir = args.user_plugin_dir
-        self.plugins = [plugin.split(':')[1] for plugin in config_file.keys() if
-                        plugin.startswith('plugin:')]
+        self.plugins = [plugin.split(':')[1] for plugin in config_file.keys()
+                        if plugin.startswith('plugin:')]
         self.configparser = config_file
 
     @staticmethod

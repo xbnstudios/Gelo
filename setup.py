@@ -8,13 +8,13 @@ setup(
     url='https://github.com/s0ph0s-2/Gelo',
     author='s0ph0s-2',
     license='GPL',
-    packages=[ 'gelo', ],
+    packages=['gelo', ],
     install_requires=[
         'yapsy',
         'requests',
     ],
     entry_points={
-        'console_scripts': [ "gelo = gelo.command_line:main" ]
+        'console_scripts': ["gelo = gelo.command_line:main"]
     },
     zip_safe=False
 )

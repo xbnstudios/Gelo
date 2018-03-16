@@ -1,6 +1,7 @@
 import os
 import requests
-from shutil import copyfile, chown
+from shutil import chown
+# from shutil import copyfile, chown
 from subprocess import Popen
 from time import time, sleep
 from gelo.configuration import InvalidConfigurationError, is_int
@@ -51,11 +52,13 @@ ICECAST_CONFIG = """<icecast>
     </security>
 </icecast>"""
 NOWPLAYING_XSL = """
-<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" version = "1.0">
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform"
+    version = "1.0">
 <xsl:output method="text" encoding="UTF-8" indent="yes" />
 <xsl:template match = "/icestats" >
 <xsl:for-each select="source">
-<xsl:if test="artist"><xsl:value-of select="artist" /> — </xsl:if><xsl:value-of select="title" />
+<xsl:if test="artist"><xsl:value-of select="artist" /> — </xsl:if><xsl:value-of
+    select="title" />
 <!-- This next line is required to put a newline after the track name -->
 <xsl:text>&#xa;</xsl:text>
 </xsl:for-each>
@@ -69,7 +72,6 @@ class Icecast(IMarkerSource):
     def __init__(self, config, mediator: IMediator):
         """Create a new instance of Icecast (the plugin)."""
         super().__init__(config, mediator)
-        self.should_terminate = False
         self.last_marker = ''
         self.config_test()
         self.setup_environment()
@@ -93,46 +95,26 @@ class Icecast(IMarkerSource):
         """
         return requests.get(
             'http://127.0.0.1:{port}/nowplaying.xsl'.format_map(self.config)
-        ).text
+        ).text.trim()
+
+    def check_mk_chown_dir(self, path: str, user: str, group: str):
+        """Create a directory owned by a user, but only if it doesn't exist."""
+        if not (os.path.exists(path) and os.path.isdir(path)):
+            os.mkdir(path)
+        chown(path, user=user, group=group)
 
     def setup_environment(self):
         """Set up the environment for Icecast, if it isn't already."""
         basedir = self.config['basedir']
         user = self.config['unprivileged_user']
         group = self.config['unprivileged_group']
-        # Make sure the Icecast chroot directory exists
+        # Make sure the Icecast chroot directory and its parents exist
         if not (
                 os.path.exists(basedir) and
                 os.path.isdir(basedir)
         ):
             os.makedirs(basedir, exist_ok=True)
         chown(basedir, user=user, group=group)
-        # Make sure the web files directory exists
-        web_path = os.path.join(basedir, 'web')
-        if not (
-                os.path.exists(web_path) and
-                os.path.isdir(web_path)
-        ):
-            os.mkdir(web_path)
-        chown(web_path, user=user, group=group)
-        # Make sure the admin pages directory exists
-        admin_path = os.path.join(basedir, 'admin')
-        if not (
-                os.path.exists(admin_path) and
-                os.path.isdir(admin_path)
-        ):
-            os.mkdir(admin_path)
-        chown(admin_path, user=user, group=group)
-        # Make sure the etc directory exists
-        etc_path = os.path.join(basedir, 'etc')
-        if not (
-                os.path.exists(etc_path) and
-                os.path.isdir(etc_path)
-        ):
-            os.mkdir(etc_path)
-        chown(basedir, user=user, group=group)
-        # Copy /etc/mime.types to {basedir}/etc/mime.types
-        # copyfile('/etc/mime.types', os.path.join(etc_path, 'mime.types'))
         # Make sure log directory exists
         log_path = os.path.join(self.config['basedir'], 'log', 'icecast')
         if not (
@@ -141,6 +123,17 @@ class Icecast(IMarkerSource):
         ):
             os.makedirs(log_path)
         chown(log_path, user=user, group=group)
+        # Make sure the web files directory exists
+        web_path = os.path.join(basedir, 'web')
+        self.check_mk_chown_dir(web_path, user, group)
+        # Make sure the admin pages directory exists
+        admin_path = os.path.join(basedir, 'admin')
+        self.check_mk_chown_dir(admin_path, user, group)
+        # Make sure the etc directory exists
+        etc_path = os.path.join(basedir, 'etc')
+        self.check_mk_chown_dir(etc_path, user, group)
+        # Copy /etc/mime.types to {basedir}/etc/mime.types
+        # copyfile('/etc/mime.types', os.path.join(etc_path, 'mime.types'))
         # Make sure the now playing file exists and has the right contents
         np_file = os.path.join(web_path, "nowplaying.xsl")
         with open(np_file, 'w') as f:
@@ -157,20 +150,20 @@ class Icecast(IMarkerSource):
         """
         errors = []
         # Port
-        if not 'port' in self.config:
+        if 'port' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "port"')
         else:
             if not is_int(self.config['port']):
-                errors.append('[plugin:icecast] has a non-numeric value for the'
-                              'key "port"')
+                errors.append('[plugin:icecast] has a non-numeric value for'
+                              'the key "port"')
             else:
                 if int(self.config['port']) >= 65536:
                     errors.append('[plugin:icecast] has a value greater than'
                                   ' 65535 for the key "port", which is not'
                                   ' supported by TCP')
         # Bind Address
-        if not 'bind_address' in self.config:
+        if 'bind_address' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "bind_address"')
         else:
@@ -178,32 +171,32 @@ class Icecast(IMarkerSource):
                 errors.append('[plugin:icecast] has a value that does not look'
                               ' like an IP address for the key "bind_address"')
         # Source password
-        if not 'source_password' in self.config:
+        if 'source_password' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "source_password"')
         # Number of Clients
-        if not 'num_clients' in self.config:
+        if 'num_clients' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "num_clients"')
         # Base directory
-        if not 'basedir' in self.config:
+        if 'basedir' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "basedir"')
         else:
             self.config['basedir'] = os.path.expandvars(self.config['basedir'])
         # Config file
-        if not 'config_file' in self.config:
+        if 'config_file' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "config_file"')
         else:
             self.config['config_file'] = \
                 os.path.expandvars(self.config['config_file'])
         # Unpriviliged User
-        if not 'unprivileged_user' in self.config:
+        if 'unprivileged_user' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "unprivileged_user"')
         # Unpriviliged Group
-        if not 'unprivileged_group' in self.config:
+        if 'unprivileged_group' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "unprivileged_group"')
         # Throw exception if necessary.
