@@ -1,0 +1,121 @@
+#
+# core: Configure the main component of Gelo
+#
+[core]
+# user_plugin_dir
+# The location of additional plugins.  Environment variable expansion is
+# performed on this string value.
+user_plugin_dir=$HOME/.config/gelo/plugins
+
+#
+# plugin:icecast: Configure the Icecast server metadata source
+#
+[plugin:icecast]
+# port
+# The port the Icecast server should bind to.
+port=8080
+# bind_address
+# The address the Icecast server should bind to.  A value of 0.0.0.0 means all
+# interfaces, which is usually not a good idea.
+bind_address=127.0.0.1
+# source_password
+# The password a source (Traktor) must specify to connect to Icecast.
+source_password=correct-horse-battery-staple
+# num_clients
+# The maximum number of permitted clients.  Must be at least 2, a good default
+# is 3.  You should probably leave this alone unless you're also using this
+# Icecast server for other things.
+num_clients = 3
+# basedir
+# The directory for Icecast to chroot into.  Configuration files will
+# automatically be populated here, and it will be created if it doesn't exist.
+# Environment variable expansion is performed on this string value.
+basedir = $HOME/.config/gelo/icecast
+# config_file
+# The place to put Icecast's configuraiton file.  Environment variables will be
+# expanded, and it doesn't have to be a subdirectory of basedir above.
+config_file = $HOME/.config/gelo/icecast.xml
+
+#
+# plugin:tweeter: Configure the Twitter plugin
+#
+[plugin:tweeter]
+########
+# NOTE #
+########
+# These next four keys are commented out.  If you run `gelo-twitter-register`,
+# the application will walk you through the process of setting them up with a
+# command-line wizard.  If you've done this sort of thing before, feel free to
+# set them yourself --- the wizard is not required!
+# Also note that due to limiations of Python's ConfigParser, running the wizard
+# will eat all of the comments in this file.  If you want to keep them, make a
+# copy of the config first, then copy the configured changes from the wizard
+# into the duplicate you just made.
+
+# consumer_key
+# The Twitter API key for this application, found under Keys and Access Tokens
+# on the Twitter Application Management page (apps.twitter.com)
+;consumer_key =
+# consumer_secret
+# The Twitter API secret for this application, found under Keys and Access
+# Tokens on the Twitter Application Management page (apps.twitter.com)
+;consumer_secret =
+# access_token_key
+# The Twitter API access token to allow this app to tweet using your account,
+# found under Keys and Access Tokens on the Twitter Application Management page
+# (apps.twitter.com).
+;access_token_key =
+# access_token_secret
+# The Twitter API access token secret to allow this app to tweet using your
+# account, found under Keys and Access Tokens on the Twitter Application
+# Management page (apps.twitter.com).
+;access_token_secret =
+
+# announce_string
+# The string that will be tweeted. "{marker}" will be substituted for the text
+# sent by the marker source
+announce_string="Now Playing: {marker}"
+
+#
+# plugin:now_playing_file: A text file that contains a single line with the
+# current marker data
+#
+[plugin:now_playing_file]
+# path
+# The path to write the now playing file to.  Environment variable expansion is
+# performed on this string value.
+path=$HOME/Desktop/np.txt
+
+
+#
+# plugin:irc: Configure the IRC client plugin
+#
+[plugin:irc]
+# nick
+# The IRC nick to use when connecting
+nick=metadatabot
+# server
+# The IRC server to connect to
+server=irc.example.com
+# port
+# The TCP port to connect to on the IRC server
+port=6697
+# tls
+# Enable TLS for the IRC connection.  Probably also in combination with
+# port=6697
+tls=True
+# command
+# The command to execute in order to announce the new track. "{marker}" will be
+# substituted for the text sent by the marker source, and multiple commands can
+# be used by putting them on the next line, indented.
+command=/msg #your_channel say Now Playing: {marker}"
+
+#
+# plugin:audacity_labels: Configure the Audacity Labels plugin
+#
+[plugin:audacity_labels]
+# path
+# The path to write the file to. Environment variable expansion is performed on
+# this string value, and "{show}" will be replaced by the show that Gelo was
+# started with.
+path=$HOME/Desktop/audacity.csv
