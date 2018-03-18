@@ -1,4 +1,5 @@
 import os
+import queue
 from gelo.configuration import InvalidConfigurationError
 from gelo.architecture import IMarkerSink, IMediator, MarkerType
 
@@ -6,19 +7,21 @@ from gelo.architecture import IMarkerSink, IMediator, MarkerType
 class NowPlayingFile(IMarkerSink):
     """Write the current TRACK marker to a text file."""
 
-    def __init__(self, config, mediator: IMediator):
+    def __init__(self, config, mediator: IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""
-        super().__init__(config, mediator)
+        super().__init__(config, mediator, show)
         self.validate_config()
         self.channel = self.mediator.subscribe([MarkerType.TRACK])
 
     def run(self):
         """Run the marker-receiving code."""
         while not self.should_terminate:
-            marker = next(self.channel.listen())
+            try:
+                marker = next(self.channel.listen())
+            except queue.Empty:
+                continue
             with open(self.config['path'], "w") as f:
-                print("Writing %s to the file..." % marker)
-                f.write(marker)
+                f.write(marker.label)
 
     def validate_config(self):
         """Ensure the configuration is valid, and perform path expansion."""
