@@ -1,8 +1,5 @@
 import configparser
 import argparse
-from typing import Tuple
-
-StatusTuple = Tuple[bool, str]
 
 
 class Configuration(object):
@@ -12,9 +9,7 @@ class Configuration(object):
     def __init__(self, config_file: configparser.ConfigParser,
                  args: argparse.Namespace):
         """Create a Configuration."""
-        validity = self.validate_config_file(config_file)
-        if not validity[0]:
-            raise InvalidConfigurationError(validity[1])
+        self.validate_config_file(config_file)
         self.user_plugin_dir = ""
         if 'user_plugin_dir' in config_file['core']:
             self.user_plugin_dir = config_file['core']['user_plugin_dir']
@@ -23,16 +18,18 @@ class Configuration(object):
         self.plugins = [plugin.split(':')[1] for plugin in config_file.keys()
                         if plugin.startswith('plugin:')]
         self.configparser = config_file
+        self.show = args.show
 
     @staticmethod
-    def validate_config_file(config_file: configparser.ConfigParser) ->\
-            StatusTuple:
+    def validate_config_file(config_file: configparser.ConfigParser):
         """Check to see if the configuration file is valid.
         This is currently probably inadequate. It just looks for the [core]
         section."""
+        errors = []
         if 'core' not in config_file:
-            return False, 'Required config section [core] missing.'
-        return True, 'Configuration file valid.'
+            errors.append('Required config section [core] missing.')
+        if len(errors) > 0:
+            raise InvalidConfigurationError(errors)
 
 
 class InvalidConfigurationError(Exception):

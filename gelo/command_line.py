@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import os
 import gelo
+import signal
 import argparse
 import configparser
-import os
+
+GELO = gelo.Gelo()
 
 
 def main():
@@ -29,8 +32,15 @@ def main():
     config_file.read_file(args.config)
     # Create the Gelo Configuration
     config = gelo.Configuration(config_file, args)
+    # Add the handler to shut down Gelo
+    signal.signal(signal.SIGINT, exit_handler)
     # Call Gelo's main function
-    gelo.main(config)
+    GELO.main(config)
+
+
+def exit_handler(sig, frame):
+    """Shut down and clean up Gelo when killed with CTRL-C"""
+    GELO.shutdown()
 
 
 if __name__ == "__main__":
