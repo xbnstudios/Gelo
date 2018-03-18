@@ -1,4 +1,4 @@
-from gelo.architecture import IMediator, MarkerType
+from gelo.arch import IMediator, MarkerType
 from gelo.plugins.icecast import Icecast
 from configparser import ConfigParser
 # import pydevd

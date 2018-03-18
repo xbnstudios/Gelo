@@ -3,7 +3,7 @@ from queue import Queue
 from functools import partial
 from configparser import ConfigParser
 from gelo.plugins.tweeter import Tweeter
-from gelo.architecture import IMediator, Marker
+from gelo.arch import IMediator, Marker
 
 
 class TestMediator(IMediator):

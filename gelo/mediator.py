@@ -2,7 +2,7 @@ import queue
 from time import time
 from threading import Lock
 from functools import partial
-from .architecture import IMediator, MarkerType, MarkerTypeList, Marker
+from .arch import IMediator, MarkerType, MarkerTypeList, Marker
 
 
 class Mediator(IMediator):

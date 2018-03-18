@@ -1,20 +1,20 @@
 import os
 import queue
-from gelo.configuration import InvalidConfigurationError
-from gelo.architecture import IMarkerSink, IMediator, MarkerType, Marker
+import gelo
 
 
-class AudacityLabels(IMarkerSink):
+class AudacityLabels(gelo.arch.IMarkerSink):
     """Write every MarkerType.TRACK marker to a CSV file, but with tabs."""
 
+    PLUGIN_MODULE_NAME = 'audacity_labels'
     LINE_TEMPLATE = "{start}\t{finish}\t{label}\n"
 
-    def __init__(self, config, mediator: IMediator, show: str):
+    def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""
         super().__init__(config, mediator, show)
         self.validate_config()
         self.clear_file()
-        self.channel = self.mediator.subscribe([MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([ gelo.arch.MarkerType.TRACK])
         self.last_marker = None
 
     def run(self):
@@ -39,7 +39,7 @@ class AudacityLabels(IMarkerSink):
                 label=self.last_marker.label
             ))
 
-    def create_line(self, marker: Marker) -> str:
+    def create_line(self, marker: gelo.arch.Marker) -> str:
         """Create a line for the file using the current marker and the last one.
         """
         return self.LINE_TEMPLATE.format(
@@ -64,4 +64,4 @@ class AudacityLabels(IMarkerSink):
             self.config['path'] = self.config['path'].format(show=self.show)
         # Return errors, if any
         if len(errors) > 0:
-            raise InvalidConfigurationError(errors)
+            raise gelo.conf.InvalidConfigurationError(errors)

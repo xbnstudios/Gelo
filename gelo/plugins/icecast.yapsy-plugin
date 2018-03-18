@@ -1,6 +1,6 @@
-[Code]
+[Core]
 Name = Icecast
-Module = icecast.py
+Module = icecast
 
 [Documentation]
 Description = Fork an Icecast server in order to capture chapter marks

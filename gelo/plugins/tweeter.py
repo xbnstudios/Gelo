@@ -1,16 +1,18 @@
+import gelo
 import queue
 import twitter
-from gelo.configuration import InvalidConfigurationError
-from gelo.architecture import IMarkerSink, IMediator, MarkerType
 
 
-class Tweeter(IMarkerSink):
+class Tweeter(gelo.arch.IMarkerSink):
     """Tweet the tracks that you play."""
-    def __init__(self, config, mediator: IMediator, show: str):
+
+    PLUGIN_MODULE_NAME = 'tweeter'
+
+    def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new Tweeter."""
         super().__init__(config, mediator, show)
         self.validate_config()
-        self.channel = self.mediator.subscribe([MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
         self.api = self.get_api()
 
     def run(self):
@@ -56,7 +58,7 @@ class Tweeter(IMarkerSink):
             errors.append('[plugin:tweeter] is missing the required key'
                           ' "announce_string"')
         if len(errors) > 0:
-            raise InvalidConfigurationError(errors)
+            raise gelo.conf.InvalidConfigurationError(errors)
 
 
 def register():

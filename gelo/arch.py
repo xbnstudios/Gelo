@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List
 from threading import Thread
 from yapsy.IPlugin import IPlugin
+from configparser import ConfigParser, SectionProxy
 
 
 class MarkerType(Enum):
@@ -56,12 +57,23 @@ class IMediator(object):
 class IMarkerSource(Thread, IPlugin):
     """An interface defining the required methods of a marker source."""
 
-    def __init__(self, config, mediator: IMediator):
+    PLUGIN_MODULE_NAME = None
+
+    def __init__(self, config, mediator: IMediator, show: str):
         """Create a new marker source."""
         super().__init__()
-        self.config = config
+        if type(config) is ConfigParser:
+            if self.PLUGIN_MODULE_NAME is None:
+                raise ValueError('Plugins must define PLUGIN_MODULE_NAME.')
+            self.config = config['plugin:' + self.PLUGIN_MODULE_NAME]
+        elif type(config) is SectionProxy:
+            self.config = config
+        else:
+            raise ValueError('config must either be a ConfigParser object or '
+                             'a SectionProxy object.')
         self.mediator = mediator
         self.should_terminate = False
+        self.show = show
 
     def run(self):
         """Run the code that creates markers.
@@ -76,13 +88,23 @@ class IMarkerSource(Thread, IPlugin):
 class IMarkerSink(Thread, IPlugin):  # noqa: F811
     """An interface defining the required methods of a marker sink."""
 
+    PLUGIN_MODULE_NAME = None
+
     def __init__(self, config, mediator: IMediator, show: str):
         """Create a new marker sink.
         :config: The section of the configuration file for this plugin
         :mediator: The IMediator to get markers from
         :show: The short name of the show that the markers are for"""
         super().__init__()
-        self.config = config
+        if type(config) is ConfigParser:
+            if self.PLUGIN_MODULE_NAME is None:
+                raise ValueError('Plugins must define PLUGIN_MODULE_NAME.')
+            self.config = config['plugin:' + self.PLUGIN_MODULE_NAME]
+        elif type(config) is SectionProxy:
+            self.config = config
+        else:
+            raise ValueError('config must either be a ConfigParser object or '
+                             'a SectionProxy object.')
         self.mediator = mediator
         self.show = show
         self.should_terminate = False

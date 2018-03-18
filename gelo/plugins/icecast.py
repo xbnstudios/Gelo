@@ -1,11 +1,10 @@
 import os
+import gelo
 import requests
 from shutil import chown
 # from shutil import copyfile, chown
 from subprocess import Popen
 from time import time, sleep
-from gelo.configuration import InvalidConfigurationError, is_int
-from gelo.architecture import IMediator, IMarkerSource, MarkerType
 
 ICECAST_CONFIG = """<icecast>
     <location>Earth</location>
@@ -66,12 +65,14 @@ NOWPLAYING_XSL = """
 </xsl:stylesheet>"""
 
 
-class Icecast(IMarkerSource):
+class Icecast(gelo.arch.IMarkerSource):
     """Fork an Icecast server in order to capture chapter marks"""
 
-    def __init__(self, config, mediator: IMediator):
+    PLUGIN_MODULE_NAME = 'icecast'
+
+    def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new instance of Icecast (the plugin)."""
-        super().__init__(config, mediator)
+        super().__init__(config, mediator, show)
         self.last_marker = ''
         self.config_test()
         self.setup_environment()
@@ -85,7 +86,7 @@ class Icecast(IMarkerSource):
         while not self.should_terminate:
             track = self.poll_icecast()
             if track != self.last_marker:
-                self.mediator.notify(MarkerType.TRACK, track)
+                self.mediator.notify(gelo.arch.MarkerType.TRACK, track)
                 self.last_marker = track
             sleep(0.25 - ((time() - starttime) % 0.25))
 
@@ -154,7 +155,7 @@ class Icecast(IMarkerSource):
             errors.append('[plugin:icecast] does not have the required key'
                           ' "port"')
         else:
-            if not is_int(self.config['port']):
+            if not gelo.conf.is_int(self.config['port']):
                 errors.append('[plugin:icecast] has a non-numeric value for'
                               'the key "port"')
             else:
@@ -201,4 +202,4 @@ class Icecast(IMarkerSource):
                           ' "unprivileged_group"')
         # Throw exception if necessary.
         if len(errors) > 0:
-            raise InvalidConfigurationError(errors)
+            raise gelo.conf.InvalidConfigurationError(errors)

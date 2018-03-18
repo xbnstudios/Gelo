@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Gelo: a podcast chapter metadata gathering tool"""
-from .architecture import IMediator
 from .mediator import Mediator
+from .arch import IMediator
 from yapsy.PluginManager import PluginManager
 from yapsy.PluginFileLocator import PluginFileLocator
 
-BUILTIN_PLUGIN_DIR = './gelo/plugins'
+BUILTIN_PLUGIN_DIR = './plugins'
 
 
 class GeloPluginManager(PluginManager):
@@ -15,7 +15,6 @@ class GeloPluginManager(PluginManager):
         """Create the PluginManager for Gelo."""
         super().__init__(categories_filter=None,
                          directories_list=None,
-                         plugin_info_ext="gelo-plugin",
                          plugin_locator=plugin_locator)
         self.config = None
         self.mediator = None
@@ -32,8 +31,15 @@ class GeloPluginManager(PluginManager):
                                          candidate_filepath):
         """Instantiate a plugin.
         The typo is intentional, because that's how the framework spells it."""
-        c = self.config['plugin:' + plugin_module_name]
+        c = self.config.configparser['plugin:' + plugin_module_name]
         return element(c, self.mediator, self.show)
+
+    def instanciateElement(self, element):
+        """Instantiate a plugin.
+        This function is backwards and stupid. It is deprecated in a
+        yet-to-be released version of Yapsy. When that version is released,
+        this class will automatically upgrade to the not-stupid version."""
+        return element(self.config.configparser, self.mediator, self.show)
 
 
 class Gelo(object):
@@ -45,12 +51,13 @@ class Gelo(object):
         )
         self.gpm = GeloPluginManager(plugin_locator=pfl)
         m = Mediator()
-        self.gpm.set_cms(configuration.configparser, m, configuration.show)
-        self.gpm.locatePlugins()
-        self.gpm.loadPlugins()
+        self.gpm.set_cms(configuration, m, configuration.show)
+        self.gpm.collectPlugins()
 
         for plugin in self.gpm.getAllPlugins():
-            plugin.start()
+            plugin.plugin_object.start()
+        for plugin in self.gpm.getAllPlugins():
+            plugin.plugin_object.join()
 
     def shutdown(self):
         for plugin in self.gpm.getAllPlugins():
