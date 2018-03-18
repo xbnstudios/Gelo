@@ -14,6 +14,10 @@ class MarkerType(Enum):
     TOPIC = 2
 
 
+# A type for a list of MarkerType
+MarkerTypeList = List[MarkerType]
+
+
 class Marker(object):
     """A marker, or a label at a time.
     The time is a float number of seconds since the first marker."""
@@ -21,9 +25,6 @@ class Marker(object):
         """Create a new marker."""
         self.label = label
         self.time = time
-
-
-MarkerList = List[Marker]
 
 
 # This class is defined here only so that the type hints work.
@@ -45,7 +46,7 @@ class IMediator(object):
         :event_label: The actual text of the event"""
         pass
 
-    def subscribe(self, event_types: MarkerList):
+    def subscribe(self, event_types: MarkerTypeList):
         """Subscribe to all of the listed event types.
         :event_types: The types of events to subscribe to
         """
