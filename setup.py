@@ -12,9 +12,13 @@ setup(
     install_requires=[
         'yapsy',
         'requests',
+        'python-twitter',
     ],
     entry_points={
-        'console_scripts': ["gelo = gelo.command_line:main"]
+        'console_scripts': [
+            "gelo = gelo.command_line:main",
+            "gelo-twitter-register = gelo.plugins.tweeter:register",
+        ]
     },
     zip_safe=False
 )
