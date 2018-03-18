@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
+from typing import List
 from threading import Thread
 from yapsy.IPlugin import IPlugin
 
@@ -22,27 +23,29 @@ class Marker(object):
         self.time = time
 
 
+MarkerList = List[Marker]
+
+
 # This class is defined here only so that the type hints work.
 class IMarkerSink(Thread, IPlugin):
     pass
 
 
-class IMediator:
+class IMediator(object):
     """A middle layer that accepts events from sources and sends them to sinks.
     """
 
     def __init__(self):
         """Create a new mediator."""
+        super().__init__()
+
+    def publish(self, event_type: MarkerType, event_label: str) -> None:
+        """Publish a new event to all applicable subscribers.
+        :event_type: The EventType corresponding to the event
+        :event_label: The actual text of the event"""
         pass
 
-    def publish(self, event_type, event_msg):
-        """Publish a new event via this mediator.
-        :event_type: The type of the event
-        :event_msg: The event string
-        """
-        pass
-
-    def subscribe(self, event_types: list):
+    def subscribe(self, event_types: MarkerList):
         """Subscribe to all of the listed event types.
         :event_types: The types of events to subscribe to
         """
