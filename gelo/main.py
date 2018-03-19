@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """Gelo: a podcast chapter metadata gathering tool"""
-from .mediator import Mediator
-from .arch import IMediator
-from yapsy.PluginManager import PluginManager
-from yapsy.PluginFileLocator import PluginFileLocator
+from gelo import arch, mediator
+from yapsy import PluginManager, PluginFileLocator
 
 BUILTIN_PLUGIN_DIR = './plugins'
 
 
-class GeloPluginManager(PluginManager):
+class GeloPluginManager(PluginManager.PluginManager):
     """Load Gelo plugins (just override the method that instantiates plugins).
     """
     def __init__(self, plugin_locator=None):
@@ -20,7 +18,8 @@ class GeloPluginManager(PluginManager):
         self.mediator = None
         self.show = None
 
-    def set_cms(self, config, mediator: IMediator, show: str) -> None:
+    def set_cms(self, config, mediator: arch.IMediator, show: str) \
+            -> None:
         """Set the config, mediator, and show to load plugins with."""
         self.config = config
         self.mediator = mediator
@@ -45,13 +44,13 @@ class GeloPluginManager(PluginManager):
 class Gelo(object):
     def main(self, configuration):
         """Use the provided configuration to load all plugins and run Gelo."""
-        pfl = PluginFileLocator()
+        pfl = PluginFileLocator.PluginFileLocator()
         pfl.setPluginPlaces(
             [BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir]
         )
         self.gpm = GeloPluginManager(plugin_locator=pfl)
-        m = Mediator()
-        self.gpm.set_cms(configuration, m, configuration.show)
+        self.m = mediator.Mediator()
+        self.gpm.set_cms(configuration, self.m, configuration.show)
         self.gpm.collectPlugins()
 
         for plugin in self.gpm.getAllPlugins():
@@ -61,4 +60,5 @@ class Gelo(object):
 
     def shutdown(self):
         for plugin in self.gpm.getAllPlugins():
-            plugin.exit()
+            plugin.plugin_object.exit()
+        self.m.terminate()

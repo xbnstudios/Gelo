@@ -1,11 +1,11 @@
+import gelo
 import queue
 from time import time
 from threading import Lock
 from functools import partial
-from .arch import IMediator, MarkerType, MarkerTypeList, Marker
 
 
-class Mediator(IMediator):
+class Mediator(gelo.arch.IMediator):
     """Accept from IMarkerSources and relay to IMarkerSinks."""
 
     QUEUE_MAX = 100
@@ -17,7 +17,8 @@ class Mediator(IMediator):
         self.channel_lock = Lock()
         self.first_time = None
 
-    def publish(self, marker_type: MarkerType, marker_label: str) -> None:
+    def publish(self, marker_type: gelo.arch.MarkerType, marker_label: str) \
+            -> None:
         """Publish a new event to all applicable subscribers.
         :marker_type: The EventType corresponding to the event
         :marker_label: The actual text of the event"""
@@ -27,7 +28,7 @@ class Mediator(IMediator):
             raise ValueError()
         if self.first_time is None:
             self.first_time = time()
-        marker = Marker(marker_label, time() - self.first_time)
+        marker = gelo.arch.Marker(marker_label, time() - self.first_time)
         if marker_type not in self.channels:
             self.channel_lock.acquire()
             if marker_type not in self.channels:
@@ -39,7 +40,7 @@ class Mediator(IMediator):
                 continue
             q.put(marker, block=False)
 
-    def subscribe(self, marker_types: MarkerTypeList) -> queue.Queue:
+    def subscribe(self, marker_types: gelo.arch.MarkerTypeList) -> queue.Queue:
         """Subscribe to all of the listed event types.
         :marker_types: A list of MarkerType types to subscribe to
         :return: A queue of markers"""
@@ -58,9 +59,16 @@ class Mediator(IMediator):
             self.channels[marker_type].append(q)
         return q
 
+    def terminate(self):
+        """Close all of the queues so the plugins can terminate."""
+        self.channel_lock.acquire()
+        for channel in self.channels:
+            for q in self.channels[channel]:
+                q.put(None, block=False)
+
     @staticmethod
-    def listen(self, q: queue.Queue, block=True, timeout=5):
-        """Retreive the next item from a queue."""
+    def listen(q: queue.Queue, block=True, timeout=None):
+        """Retrieve the next item from a queue."""
         while True:
             try:
                 data = q.get(block=block, timeout=timeout)
@@ -72,5 +80,5 @@ class Mediator(IMediator):
 
 
 class UnsubscribeException(Exception):
-    """Raised when a queue should be unsubscribed from."""
+    """Raised when a queue is closing down and listeners should unsubscribe."""
     pass

@@ -19,10 +19,12 @@ class NowPlayingFile(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
+                with open(self.config['path'], "w") as f:
+                    f.write(marker.label)
             except queue.Empty:
                 continue
-            with open(self.config['path'], "w") as f:
-                f.write(marker.label)
+            except gelo.mediator.UnsubscribeException:
+                self.should_terminate = True
 
     def validate_config(self):
         """Ensure the configuration is valid, and perform path expansion."""

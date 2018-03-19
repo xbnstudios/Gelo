@@ -22,22 +22,25 @@ class AudacityLabels(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 current_marker = next(self.channel.listen())
+                if self.last_marker is not None:
+                    line = self.create_line(current_marker)
+                    with open(self.config['path'], 'a') as f:
+                        f.write(line)
+                    self.last_marker = current_marker
+                else:
+                    self.last_marker = current_marker
+                    continue
             except queue.Empty:
                 continue
-            if self.last_marker is not None:
-                line = self.create_line(current_marker)
-                with open(self.config['path'], 'a') as f:
-                    f.write(line)
-                self.last_marker = current_marker
-            else:
-                self.last_marker = current_marker
-                continue
-        with open(self.config['path'], 'a') as f:
-            f.write(self.LINE_TEMPLATE.format(
-                start=self.last_marker.time,
-                finish=self.last_marker.time,
-                label=self.last_marker.label
-            ))
+            except gelo.mediator.UnsubscribeException:
+                self.should_terminate = True
+        if self.last_marker is not None:
+            with open(self.config['path'], 'a') as f:
+                f.write(self.LINE_TEMPLATE.format(
+                    start=self.last_marker.time,
+                    finish=self.last_marker.time,
+                    label=self.last_marker.label
+                ))
 
     def create_line(self, marker: gelo.arch.Marker) -> str:
         """Create a line for the file using the current marker and the last one.

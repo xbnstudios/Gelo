@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='gelo',
@@ -8,7 +8,7 @@ setup(
     url='https://github.com/s0ph0s-2/Gelo',
     author='s0ph0s-2',
     license='GPL',
-    packages=['gelo', ],
+    packages=find_packages(),
     install_requires=[
         'yapsy',
         'requests',

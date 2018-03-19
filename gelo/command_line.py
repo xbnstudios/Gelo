@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-import gelo
+from gelo import main, conf
 import signal
 import argparse
 import configparser
 
-GELO = gelo.Gelo()
+GELO = main.Gelo()
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     config_file = configparser.ConfigParser()
     config_file.read_file(args.config)
     # Create the Gelo Configuration
-    config = gelo.Configuration(config_file, args)
+    config = conf.Configuration(config_file, args)
     # Add the handler to shut down Gelo
     signal.signal(signal.SIGINT, exit_handler)
     # Call Gelo's main function
