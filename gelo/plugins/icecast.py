@@ -1,6 +1,6 @@
 import os
-import gelo
 import requests
+from gelo import arch, conf
 from shutil import chown
 # from shutil import copyfile, chown
 from subprocess import Popen
@@ -65,12 +65,12 @@ NOWPLAYING_XSL = """
 </xsl:stylesheet>"""
 
 
-class Icecast(gelo.arch.IMarkerSource):
+class Icecast(arch.IMarkerSource):
     """Fork an Icecast server in order to capture chapter marks"""
 
     PLUGIN_MODULE_NAME = 'icecast'
 
-    def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
+    def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new instance of Icecast (the plugin)."""
         super().__init__(config, mediator, show)
         self.last_marker = ''
@@ -82,11 +82,12 @@ class Icecast(gelo.arch.IMarkerSource):
         This should be run as a thread."""
         # Fork Icecast
         Popen(['icecast', '-c', self.config['config_file']])
+        sleep(1)
         starttime = time()
         while not self.should_terminate:
             track = self.poll_icecast()
             if track != self.last_marker:
-                self.mediator.notify(gelo.arch.MarkerType.TRACK, track)
+                self.mediator.publish(arch.MarkerType.TRACK, track)
                 self.last_marker = track
             sleep(0.25 - ((time() - starttime) % 0.25))
 
@@ -96,7 +97,7 @@ class Icecast(gelo.arch.IMarkerSource):
         """
         return requests.get(
             'http://127.0.0.1:{port}/nowplaying.xsl'.format_map(self.config)
-        ).text.trim()
+        ).text.strip()
 
     def check_mk_chown_dir(self, path: str, user: str, group: str):
         """Create a directory owned by a user, but only if it doesn't exist."""
@@ -155,7 +156,7 @@ class Icecast(gelo.arch.IMarkerSource):
             errors.append('[plugin:icecast] does not have the required key'
                           ' "port"')
         else:
-            if not gelo.conf.is_int(self.config['port']):
+            if not conf.is_int(self.config['port']):
                 errors.append('[plugin:icecast] has a non-numeric value for'
                               'the key "port"')
             else:
@@ -202,4 +203,4 @@ class Icecast(gelo.arch.IMarkerSource):
                           ' "unprivileged_group"')
         # Throw exception if necessary.
         if len(errors) > 0:
-            raise gelo.conf.InvalidConfigurationError(errors)
+            raise conf.InvalidConfigurationError(errors)

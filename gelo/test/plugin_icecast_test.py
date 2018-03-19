@@ -18,14 +18,14 @@ def main():
     config['DEFAULT']['port'] = '8080'
     config['DEFAULT']['bind_address'] = '127.0.0.1'
     config['DEFAULT']['source_password'] = 'correct-horse-battery-staple'
-    config['DEFAULT']['num_clients'] = '3'
+    config['DEFAULT']['num_clients'] = '100'
     config['DEFAULT']['basedir'] = '/Users/s0ph0s/.config/gelo/icecast'
     config['DEFAULT']['config_file'] = '/Users/s0ph0s/.config/gelo/icecast.xml'
     config['DEFAULT']['unprivileged_user'] = 's0ph0s'
     config['DEFAULT']['unprivileged_group'] = 'staff'
 
     tm = TestMediator()
-    plugin = Icecast(config['DEFAULT'], tm)
+    plugin = Icecast(config['DEFAULT'], tm, 'fnt-200')
     plugin.start()
 
 
