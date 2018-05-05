@@ -30,7 +30,19 @@ For more information about the design of the application, look in `doc/design`.
 
 ## Usage
 
-There's no code here yet, what do you want to use?
+```bash
+mkdir -p ~/.config/gelo
+cp gelo.ini.example ~/.config/gelo/gelo.ini
+edit ~/.config/gelo/gelo.ini  # Configure to your liking
+sudo gelo slug-123
+```
+
+For more detailed information about how to use Gelo, consult `docs/`.  Gelo
+requires root privileges, but not for anything nefarious.  For security reasons,
+Gelo chroots Icecast into a custom directory.  Unfortunately, this can't be
+accomplished without root privileges.  Both Gelo and Icecast drop privileges *as
+soon as they can*, so the risk is minimal.  If you find any security issues with
+this system, please raise a GitHub issue.
 
 
 ## Etymology
