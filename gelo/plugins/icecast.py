@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import requests.exceptions
 from gelo import arch, conf
 from shutil import chown
 # from shutil import copyfile, chown
@@ -90,7 +91,10 @@ class Icecast(arch.IMarkerSource):
         starttime = time()
         while not self.should_terminate:
             sleep(0.25 - ((time() - starttime) % 0.25))
-            track = self.poll_icecast()
+            try:
+                track = self.poll_icecast()
+            except requests.exceptions.ConnectionError:
+                continue
             if track == self.last_marker:
                 continue
             m = arch.Marker(track)

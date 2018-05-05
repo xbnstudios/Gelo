@@ -86,9 +86,9 @@ class Gelo(object):
             plugin.plugin_object.join()
 
     def shutdown(self):
+        self.m.terminate()
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.exit()
-        self.m.terminate()
 
     def drop_privileges(self, user='nobody', group='nogroup'):
         """Drop privileges to the specified user and group.
