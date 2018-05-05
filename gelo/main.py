@@ -7,7 +7,11 @@ import pwd
 from gelo import arch, mediator
 from yapsy import PluginManager, PluginFileLocator
 
-# pydevd.settrace('localhost', port=9999, stdoutToServer=True, stderrToServer=True)
+# pydevd.settrace(
+#     'localhost',
+#     port=9999,
+#     stdoutToServer=True,
+#     stderrToServer=True)
 BUILTIN_PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'plugins')
 
 
@@ -17,6 +21,11 @@ class GeloPluginManager(PluginManager.PluginManager):
 
     def __init__(self, plugin_locator=None):
         """Create the PluginManager for Gelo."""
+        if plugin_locator is None:
+            plugin_locator = PluginFileLocator.PluginFileAnalyzerWithInfoFile(
+                'GeloPluginAnalyzer',
+                extensions='gelo-plugin'
+            )
         super().__init__(categories_filter=None,
                          directories_list=None,
                          plugin_locator=plugin_locator)
@@ -50,7 +59,13 @@ class GeloPluginManager(PluginManager.PluginManager):
 class Gelo(object):
     def main(self, configuration):
         """Use the provided configuration to load all plugins and run Gelo."""
+        pfa = PluginFileLocator.PluginFileAnalyzerWithInfoFile(
+            'gelo_info_ext',
+            extensions='gelo-plugin'
+        )
         pfl = PluginFileLocator.PluginFileLocator()
+        pfl.removeAnalyzers('info_ext')
+        pfl.appendAnalyzer(pfa)
         pfl.setPluginPlaces(
             [BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir]
         )
