@@ -37,7 +37,7 @@ class IRC(gelo.arch.IMarkerSink):
         self.should_terminate = True
 
     def on_join(self, connection, event):
-        pass
+        print("Joined", self.send_to)
 
     def run(self):
         """Run the code that will receive markers and post them to IRC."""
@@ -54,8 +54,10 @@ class IRC(gelo.arch.IMarkerSink):
             try:
                 reactor.process_once(timeout=0.5)
                 # TODO: this should timeout too
-                marker = next(self.channel.listen())
+                marker = next(self.channel.listen(timeout=0.5))
                 c.privmsg(self.send_to, self.make_message(marker))
+            except StopIteration:
+                continue
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
@@ -63,7 +65,9 @@ class IRC(gelo.arch.IMarkerSink):
 
     def make_message(self, marker: gelo.arch.Marker):
         """Make the text of the message to send."""
-        return self.message.format(marker=marker.label)
+        special = " ({special})".format(special=marker.special) if \
+            marker.special is not None else ""
+        return self.message.format(marker=marker.label, special=special)
 
     def validate_config(self):
         """Ensure the configuration file is valid."""

@@ -8,8 +8,8 @@ from subprocess import Popen
 from time import time, sleep
 
 ICECAST_CONFIG = """<icecast>
-    <location>Earth</location>
-    <admin>icemaster@localhost</admin>
+    <location>Your PC</location>
+    <admin>nobody@nowhere</admin>
     <limits>
         <clients>{num_clients}</clients>
         <sources>1</sources>

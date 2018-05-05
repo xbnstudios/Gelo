@@ -1,4 +1,5 @@
-import gelo
+import gelo.arch
+import gelo.conf
 import queue
 import twitter
 
@@ -20,16 +21,19 @@ class Tweeter(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
-                self.tweet(marker.label)
+                self.tweet(marker)
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
                 self.should_terminate = True
 
-    def tweet(self, marker: str):
+    def tweet(self, marker: gelo.arch.Marker):
         """Connect to Twitter and tweet the track."""
+        special = " ({special})".format(special=marker.special) if \
+            marker.special is not None else ""
         return self.api.PostUpdate(
-            self.config['announce_string'].format(marker=marker)
+            self.config['announce_string'].format(marker=marker.text,
+                                                  special=special)
         )
 
     def get_api(self):

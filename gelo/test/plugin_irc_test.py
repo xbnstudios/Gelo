@@ -13,14 +13,16 @@ class TestMediator(gelo.arch.IMediator):
         """Create the Mediator."""
         super().__init__()
         self.q = Queue()
-        self.q.put(gelo.arch.Marker('ABBA - Money Money Money', 0.0))
-        self.q.put(gelo.arch.Marker('John Travolta - Summer Lovin', 2.01))
-        self.q.put(gelo.arch.Marker('Imperial Leisure - Man On The Street',
+        self.q.put(gelo.arch.Marker.withtime('ABBA - Money Money Money', 0.0))
+        self.q.put(gelo.arch.Marker.withtime('John Travolta - Summer Lovin', 2.01))
+        self.q.put(gelo.arch.Marker.withtime('Imperial Leisure - Man On The Street',
                                     3.84))
-        self.q.put(gelo.arch.Marker('Zammuto - Need Some Sun', 6.23))
-        self.q.put(gelo.arch.Marker('3typen - Pretty Little Thing', 7.98))
-        self.q.put(gelo.arch.Marker('The Darkness - Forbidden Love', 9.59))
-        self.q.put(gelo.arch.Marker('Justice - Fire', 13.01))
+        m = gelo.arch.Marker.withtime('Zammuto - Need Some Sun', 6.23)
+        m.special = "Bit Perfectly"
+        self.q.put(m)
+        self.q.put(gelo.arch.Marker.withtime('3typen - Pretty Little Thing', 7.98))
+        self.q.put(gelo.arch.Marker.withtime('The Darkness - Forbidden Love', 9.59))
+        self.q.put(gelo.arch.Marker.withtime('Justice - Fire', 13.01))
         self.q.listen = partial(self.listen, self.q)
 
     def subscribe(self, event_types: list):
@@ -42,7 +44,7 @@ def main():
     c['DEFAULT']['port'] = '6667'
     c['DEFAULT']['tls'] = 'False'
     c['DEFAULT']['send_to'] = '#test'
-    c['DEFAULT']['message'] = 'Now Playing: {marker}'
+    c['DEFAULT']['message'] = 'Now Playing{special}: {marker}'
     tm = TestMediator()
 
     t = gelo.plugins.irc.IRC(c['DEFAULT'], tm, 'fnt-200')

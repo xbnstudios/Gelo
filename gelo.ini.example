@@ -91,8 +91,9 @@ prefix_file = /tmp/prefix.txt
 
 # announce_string
 # The string that will be tweeted. "{marker}" will be substituted for the text
-# sent by the marker source
-announce_string="Now Playing: {marker}"
+# sent by the marker source.  "{special}" will be substituted for " (...)",
+# where the ellipsis is any special status attached to the marker.
+announce_string=Now Playing{special}: {marker}
 
 #
 # plugin:now_playing_file: A text file that contains a single line with the

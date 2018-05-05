@@ -33,6 +33,13 @@ class Marker(object):
         return "Marker(%s, %s, %s, %s)" % (self.label, self.time, self.special,
                                            self.url)
 
+    @classmethod
+    def withtime(cls, label: str, time: float):
+        """Create a marker with a time."""
+        m = cls(label)
+        m.time = time
+        return m
+
 
 # This class is defined here only so that the type hints work.
 class IMarkerSink(Thread, IPlugin):
