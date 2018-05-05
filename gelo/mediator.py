@@ -1,4 +1,5 @@
 import gelo
+import gelo.arch
 import queue
 from time import time
 from threading import Lock
@@ -17,18 +18,18 @@ class Mediator(gelo.arch.IMediator):
         self.channel_lock = Lock()
         self.first_time = None
 
-    def publish(self, marker_type: gelo.arch.MarkerType, marker_label: str) \
-            -> None:
+    def publish(self, marker_type: gelo.arch.MarkerType, marker:
+                gelo.arch.Marker) -> None:
         """Publish a new event to all applicable subscribers.
         :marker_type: The EventType corresponding to the event
-        :marker_label: The actual text of the event"""
+        :marker: The marker to publish"""
         if not marker_type:
             raise ValueError()
-        if not marker_label:
+        if not marker:
             raise ValueError()
         if self.first_time is None:
             self.first_time = time()
-        marker = gelo.arch.Marker(marker_label, time() - self.first_time)
+        marker.time = time() - self.first_time
         if marker_type not in self.channels:
             self.channel_lock.acquire()
             if marker_type not in self.channels:

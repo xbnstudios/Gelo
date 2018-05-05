@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 from gelo import arch, conf
 from shutil import chown
@@ -75,6 +76,9 @@ class Icecast(arch.IMarkerSource):
         super().__init__(config, mediator, show)
         self.last_marker = ''
         self.config_test()
+        self.prefix_file = self.config['prefix_file']
+        # Match anything inside parenthesis
+        self.special_matcher = re.compile(r".*\((.*)\).*")
         self.setup_environment()
 
     def run(self):
@@ -85,11 +89,14 @@ class Icecast(arch.IMarkerSource):
         sleep(1)
         starttime = time()
         while not self.should_terminate:
-            track = self.poll_icecast()
-            if track != self.last_marker:
-                self.mediator.publish(arch.MarkerType.TRACK, track)
-                self.last_marker = track
             sleep(0.25 - ((time() - starttime) % 0.25))
+            track = self.poll_icecast()
+            if track == self.last_marker:
+                continue
+            m = arch.Marker(track)
+            m.special = self.check_prefix_file()
+            self.mediator.publish(arch.MarkerType.TRACK, m)
+            self.last_marker = track
 
     def poll_icecast(self) -> str:
         """Connect to the Icecast server via HTTP and request the current track.
@@ -98,6 +105,17 @@ class Icecast(arch.IMarkerSource):
         return requests.get(
             'http://127.0.0.1:{port}/nowplaying.xsl'.format_map(self.config)
         ).text.strip()
+
+    def check_prefix_file(self) -> str:
+        """Check the prefix file to see if the track needs a special prefix.
+        :return: The prefix, or None if there shouldn't be one."""
+        try:
+            with open(self.prefix_file, "r") as pf:
+                first_line = pf.readline()
+                g = self.special_matcher.match(first_line)
+                return g.group(1) if g is not None else None
+        except IOError:
+            return None
 
     def check_mk_chown_dir(self, path: str, user: str, group: str):
         """Create a directory owned by a user, but only if it doesn't exist."""
@@ -201,6 +219,9 @@ class Icecast(arch.IMarkerSource):
         if 'unprivileged_group' not in self.config:
             errors.append('[plugin:icecast] does not have the required key'
                           ' "unprivileged_group"')
+        if 'prefix_file' not in self.config:
+            errors.append('[plugin:icecast] does not have the required key'
+                          ' "prefix_file"')
         # Throw exception if necessary.
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)

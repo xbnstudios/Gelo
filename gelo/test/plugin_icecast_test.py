@@ -1,4 +1,4 @@
-from gelo.arch import IMediator, MarkerType
+from gelo.arch import IMediator, MarkerType, Marker
 from gelo.plugins.icecast import Icecast
 from configparser import ConfigParser
 # import pydevd
@@ -9,7 +9,7 @@ from configparser import ConfigParser
 class TestMediator(IMediator):
     """Test Mediator, which just prints out the tracks it's notified of."""
 
-    def notify(self, marker_type: MarkerType, marker: str):
+    def publish(self, marker_type: MarkerType, marker: Marker):
         print(marker_type, marker)
 
 
@@ -23,6 +23,7 @@ def main():
     config['DEFAULT']['config_file'] = '/Users/s0ph0s/.config/gelo/icecast.xml'
     config['DEFAULT']['unprivileged_user'] = 's0ph0s'
     config['DEFAULT']['unprivileged_group'] = 'staff'
+    config['DEFAULT']['prefix_file'] = '/tmp/prefix.txt'
 
     tm = TestMediator()
     plugin = Icecast(config['DEFAULT'], tm, 'fnt-200')

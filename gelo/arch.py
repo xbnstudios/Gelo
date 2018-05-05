@@ -22,10 +22,16 @@ MarkerTypeList = List[MarkerType]
 class Marker(object):
     """A marker, or a label at a time.
     The time is a float number of seconds since the first marker."""
-    def __init__(self, label: str, time: float):
+    def __init__(self, label: str):
         """Create a new marker."""
         self.label = label
-        self.time = time
+        self.time = None
+        self.url = None
+        self.special = None
+
+    def __repr__(self):
+        return "Marker(%s, %s, %s, %s)" % (self.label, self.time, self.special,
+                                           self.url)
 
 
 # This class is defined here only so that the type hints work.
@@ -41,7 +47,7 @@ class IMediator(object):
         """Create a new mediator."""
         super().__init__()
 
-    def publish(self, event_type: MarkerType, event_label: str) -> None:
+    def publish(self, event_type: MarkerType, event: Marker) -> None:
         """Publish a new event to all applicable subscribers.
         :event_type: The EventType corresponding to the event
         :event_label: The actual text of the event"""
