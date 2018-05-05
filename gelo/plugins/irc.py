@@ -16,6 +16,11 @@ class IRC(gelo.arch.IMarkerSink):
         self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
         self.validate_config()
         self.nick = self.config['nick']
+        if self.config['nickserv_pass'] != '':
+            self.nickserv_enable = True
+            self.nickserv_pass = self.config['nickserv_pass']
+        else:
+            self.nickserv_enable = False
         self.server = self.config['server']
         self.port = int(self.config['port'])
         self.tls = self.config['tls']
@@ -23,10 +28,13 @@ class IRC(gelo.arch.IMarkerSink):
         self.message = self.config['message']
 
     def on_connect(self, connection, event):
-        pass
+        if self.nickserv_enable:
+            connection.privmsg('nickserv', 'identify %s' % self.nickserv_pass)
+        if irc.client.is_channel(self.send_to):
+            connection.join(self.send_to)
 
     def on_disconnect(self, connection, event):
-        pass
+        self.should_terminate = True
 
     def on_join(self, connection, event):
         pass
@@ -62,6 +70,9 @@ class IRC(gelo.arch.IMarkerSink):
         errors = []
         if 'nick' not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "nick"')
+        if 'nickserv_pass' not in self.config.keys():
+            errors.append('[plugin:irc] is missing the required key '
+                          '"nickserv_pass"')
         if 'server' not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "server"')
         if 'port' not in self.config.keys():

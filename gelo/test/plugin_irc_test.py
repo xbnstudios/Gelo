@@ -37,6 +37,7 @@ def main():
     """Run the main test driver"""
     c = ConfigParser()
     c['DEFAULT']['nick'] = 'gelo'
+    c['DEFAULT']['nickserv_pass'] = 'catdog'
     c['DEFAULT']['server'] = 'localhost'
     c['DEFAULT']['port'] = '6667'
     c['DEFAULT']['tls'] = 'False'
