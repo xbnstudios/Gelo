@@ -1,17 +1,10 @@
 # -*- coding: utf-8 -*-
 """Gelo: a podcast chapter metadata gathering tool"""
 import os
-import grp
-import pwd
-# import pydevd
 from gelo import arch, mediator
 from yapsy import PluginManager, PluginFileLocator
 
-# pydevd.settrace(
-#     'localhost',
-#     port=9999,
-#     stdoutToServer=True,
-#     stderrToServer=True)
+
 BUILTIN_PLUGIN_DIR = os.path.join(os.path.dirname(__file__), 'plugins')
 
 
@@ -76,12 +69,6 @@ class Gelo(object):
 
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.start()
-        self.drop_privileges(
-            user=configuration.configparser['core'].get('unprivileged_user',
-                                                        'nobody'),
-            group=configuration.configparser['core'].get('unprivileged_group',
-                                                         'nogroup')
-        )
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.join()
 
@@ -89,26 +76,3 @@ class Gelo(object):
         self.m.terminate()
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.exit()
-
-    def drop_privileges(self, user='nobody', group='nogroup'):
-        """Drop privileges to the specified user and group.
-        By default, this function de-elevates to nobody/nogroup.
-        :param user: The user to drop privileges to
-        :param group: The group to drop privileges to"""
-        if os.getuid() != 0:
-            # I'm not root, nothing to do.
-            return
-        unpriv_uid = pwd.getpwnam(user)[2]
-        unpriv_gid = grp.getgrnam(group)[2]
-        try:
-            os.setgid(unpriv_gid)
-        except OSError as ose:
-            print("Could not drop privileges to", group)
-            print(ose.strerror)
-        try:
-            os.setuid(unpriv_uid)
-        except OSError as ose:
-            print("Could not drop privileges to", user)
-            print(ose.strerror)
-        os.umask(0o77)
-        print('successfully dropped privileges')
