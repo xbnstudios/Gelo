@@ -74,8 +74,8 @@ class IRC(gelo.arch.IMarkerSink):
             try:
                 marker = next(self.channel.listen(timeout=0.5))
                 self.send_message(marker, connection)
-            except StopIteration:
-                continue
+#             except StopIteration:
+#                 continue
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
@@ -94,12 +94,13 @@ class IRC(gelo.arch.IMarkerSink):
         if self.repeat_with is not None:
             # Send message with each of the repeat items
             for item in self.repeat_with:
-                to_send = self.message.format(marker=marker.label,
+                to_send = self.message.format(marker=marker.label.strip("\n"),
                                               special=special, item=item)
                 c.privmsg(self.send_to, to_send)
         else:
             # Send just one message
-            to_send = self.message.format(marker=marker.label, special=special)
+            to_send = self.message.format(marker=marker.label.strip("\n"),
+                                          special=special)
             c.privmsg(self.send_to, to_send)
 
     def validate_config(self):

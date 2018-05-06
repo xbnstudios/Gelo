@@ -32,7 +32,7 @@ class Tweeter(gelo.arch.IMarkerSink):
         special = " ({special})".format(special=marker.special) if \
             marker.special is not None else ""
         return self.api.PostUpdate(
-            self.config['announce_string'].format(marker=marker.text,
+            self.config['announce_string'].format(marker=marker.label,
                                                   special=special)
         )
 
