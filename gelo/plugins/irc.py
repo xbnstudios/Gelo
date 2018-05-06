@@ -27,6 +27,8 @@ class IRC(gelo.arch.IMarkerSink):
         self.tls = gelo.conf.as_bool(self.config['tls'])
         self.ipv6 = gelo.conf.as_bool(self.config['ipv6'])
         self.send_to = self.config['send_to']
+        self.repeat_with = self.config['repeat_with'].split(",") if \
+            'repeat_with' in self.config.keys() else None
         self.message = self.config['message']
 
     def on_connect(self, connection, event):
@@ -34,12 +36,14 @@ class IRC(gelo.arch.IMarkerSink):
             connection.privmsg('nickserv', 'identify %s' % self.nickserv_pass)
         if irc.client.is_channel(self.send_to):
             connection.join(self.send_to)
+        else:
+            self.main_loop(connection)
 
     def on_disconnect(self, connection, event):
         self.should_terminate = True
 
     def on_join(self, connection, event):
-        print("Joined", self.send_to)
+        self.main_loop(connection)
 
     def run(self):
         """Run the code that will receive markers and post them to IRC."""
@@ -57,24 +61,46 @@ class IRC(gelo.arch.IMarkerSink):
         c.add_global_handler("welcome", self.on_connect)
         c.add_global_handler("disconnect", self.on_disconnect)
         c.add_global_handler("join", self.on_join)
-        # TODO: If markers are sent before the client finishes connecting, this eats them silently
+
+        reactor.process_forever()
+
+    def main_loop(self, connection: irc.client.connection):
+        """Fetch new markers from the queue and send them in IRC.
+
+        :param connection: The connection to the IRC server to send messages
+        via.
+        """
         while not self.should_terminate:
             try:
-                reactor.process_once(timeout=0.5)
                 marker = next(self.channel.listen(timeout=0.5))
-                c.privmsg(self.send_to, self.make_message(marker))
+                self.send_message(marker, connection)
             except StopIteration:
                 continue
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
                 self.should_terminate = True
+                connection.quit(message="Metadata system shutdown")
 
-    def make_message(self, marker: gelo.arch.Marker):
-        """Make the text of the message to send."""
+    def send_message(self, marker: gelo.arch.Marker, c: irc.client.connection):
+        """Use the provided connection to send a message (or several,
+        if configured) about the provided marker.
+        :param marker: The marker to message about.
+        :param c: The connection to send messages on.
+        """
+        # Build the "special" string. " (Bit Perfectly)" if set, otherwise ""
         special = " ({special})".format(special=marker.special) if \
             marker.special is not None else ""
-        return self.message.format(marker=marker.label, special=special)
+        if self.repeat_with is not None:
+            # Send message with each of the repeat items
+            for item in self.repeat_with:
+                to_send = self.message.format(marker=marker.label,
+                                              special=special, item=item)
+                c.privmsg(self.send_to, to_send)
+        else:
+            # Send just one message
+            to_send = self.message.format(marker=marker.label, special=special)
+            c.privmsg(self.send_to, to_send)
 
     def validate_config(self):
         """Ensure the configuration file is valid."""

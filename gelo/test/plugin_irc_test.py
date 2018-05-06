@@ -40,11 +40,11 @@ def main():
     c = ConfigParser()
     c['DEFAULT']['nick'] = 'gelo'
     c['DEFAULT']['nickserv_pass'] = ''
-    c['DEFAULT']['server'] = 'irc.bad.pet'
+    c['DEFAULT']['server'] = 'irc.example.com'
     c['DEFAULT']['port'] = '6697'
     c['DEFAULT']['tls'] = 'True'
     c['DEFAULT']['ipv6'] = 'False'
-    c['DEFAULT']['send_to'] = '#fnt'
+    c['DEFAULT']['send_to'] = 'BotServ'
     c['DEFAULT']['message'] = 'Now Playing{special}: {marker}'
     tm = TestMediator()
 

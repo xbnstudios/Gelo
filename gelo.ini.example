@@ -94,14 +94,24 @@ port=6697
 # Enable TLS for the IRC connection.  Probably also in combination with
 # port=6697
 tls=True
+# ipv6
+# Force the IRC connection over IPv6. I'm not entirely sure what the underlying
+# framework does with this, so maybe it falls back intelligently?
+ipv6=True
 # send_to
 # The nick (or channel) to which to send messages
 send_to=#test
+# repeat_with
+# Repeat the message with these strings (usually channels, although you could
+# get creative with it...).  Separate items with a comma. To disable this
+# behavior and just send one message, comment out this key.
+;repeat_with=#channel,#channel2,#channel3
 # message
 # The message to send. The group {marker} will be replaced with the marker text.
 # The group {special} will be replaced with a special indicator, if the marker
 # has a special status. The indicator has a space before it, so take that into
-# account when creating this string.
+# account when creating this string. If repeat_with is defined, the message will
+# be repeated, each time substituting in one of the items for {item}.
 message=Now Playing{special}: {marker}
 
 #
