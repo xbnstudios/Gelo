@@ -12,6 +12,8 @@ A podcast chapter metadata gathering tool.
    :maxdepth: 2
    :caption: Contents:
 
+   gelo.rst
+
 Overview
 ========
 
@@ -21,6 +23,7 @@ two-part system that collects chapter metadata for a podcast and writes it into
 an MP3 file.
 
 .. _XBN: https://xbn.fm
+
 
 Design
 ======
