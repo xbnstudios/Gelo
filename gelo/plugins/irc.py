@@ -2,6 +2,7 @@ import gelo.arch
 import gelo.conf
 import gelo.mediator
 import sys
+import ssl
 import queue
 import irc.client
 
@@ -23,7 +24,8 @@ class IRC(gelo.arch.IMarkerSink):
             self.nickserv_enable = False
         self.server = self.config['server']
         self.port = int(self.config['port'])
-        self.tls = self.config['tls']
+        self.tls = gelo.conf.as_bool(self.config['tls'])
+        self.ipv6 = gelo.conf.as_bool(self.config['ipv6'])
         self.send_to = self.config['send_to']
         self.message = self.config['message']
 
@@ -43,17 +45,22 @@ class IRC(gelo.arch.IMarkerSink):
         """Run the code that will receive markers and post them to IRC."""
         reactor = irc.client.Reactor()
         try:
-            c = reactor.server().connect(self.server, self.port, self.nick)
+            wrapper = ssl.wrap_socket if self.tls else \
+                irc.client.connection.identity
+            factory = irc.client.connection.Factory(ipv6=self.ipv6,
+                                                    wrapper=wrapper)
+            c = reactor.server().connect(self.server, self.port, self.nick,
+                                         connect_factory=factory)
         except irc.client.ServerConnectionError:
             print(sys.exc_info()[1])
             raise SystemExit(1)
         c.add_global_handler("welcome", self.on_connect)
         c.add_global_handler("disconnect", self.on_disconnect)
         c.add_global_handler("join", self.on_join)
+        # TODO: If markers are sent before the client finishes connecting, this eats them silently
         while not self.should_terminate:
             try:
                 reactor.process_once(timeout=0.5)
-                # TODO: this should timeout too
                 marker = next(self.channel.listen(timeout=0.5))
                 c.privmsg(self.send_to, self.make_message(marker))
             except StopIteration:
@@ -92,6 +99,16 @@ class IRC(gelo.arch.IMarkerSink):
                                   ' supported by TCP')
         if 'tls' not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "tls"')
+        else:
+            if not gelo.conf.is_bool(self.config['tls']):
+                errors.append('[plugin:irc] must have a boolean value for the '
+                              'key "tls"')
+        if 'ipv6' not in self.config.keys():
+            errors.append('[plugin:irc] is missing the required key "ipv6"')
+        else:
+            if not gelo.conf.is_bool(self.config['ipv6']):
+                errors.append('[plugin:irc] must have a boolean value for the '
+                              'key "tls"')
         if 'send_to' not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "send_to"')
         if 'message' not in self.config.keys():

@@ -39,11 +39,12 @@ def main():
     """Run the main test driver"""
     c = ConfigParser()
     c['DEFAULT']['nick'] = 'gelo'
-    c['DEFAULT']['nickserv_pass'] = 'catdog'
-    c['DEFAULT']['server'] = 'localhost'
-    c['DEFAULT']['port'] = '6667'
-    c['DEFAULT']['tls'] = 'False'
-    c['DEFAULT']['send_to'] = '#test'
+    c['DEFAULT']['nickserv_pass'] = ''
+    c['DEFAULT']['server'] = 'irc.bad.pet'
+    c['DEFAULT']['port'] = '6697'
+    c['DEFAULT']['tls'] = 'True'
+    c['DEFAULT']['ipv6'] = 'False'
+    c['DEFAULT']['send_to'] = '#fnt'
     c['DEFAULT']['message'] = 'Now Playing{special}: {marker}'
     tm = TestMediator()
 

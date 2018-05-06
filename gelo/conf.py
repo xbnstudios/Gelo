@@ -37,10 +37,36 @@ class InvalidConfigurationError(Exception):
 
 
 def is_int(value: str) -> bool:
-    """Check to see if the value passed is an integer."""
+    """Check to see if the value passed is an integer.
+
+    :return: True if the value can be converted to an integer,
+    False otherwise."""
     try:
         int(value)
     except ValueError:
         return False
     else:
         return True
+
+
+def is_bool(value: str) -> bool:
+    """Check to see if the value passed is parsable as a boolean.
+
+    :return: True if ``value`` is one of yes, no, true, false, 1, 0, on, or off.
+    """
+    return value.lower() in ['yes', 'no',
+                             'true', 'false',
+                             '1', '0',
+                             'on', 'off']
+
+
+def as_bool(value: str) -> bool:
+    """Parse the value as a boolean.
+
+    :return: True if ``value`` parses as true, False if ``value`` parses as
+    false.
+    :raises: ValueError if ``value`` is not parsable as a boolean.
+    """
+    if not is_bool(value):
+        raise ValueError("%s cannot be coerced to a boolean" % value)
+    return value.lower() in ['yes', 'true', '1', 'on']
