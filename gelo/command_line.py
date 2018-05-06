@@ -10,6 +10,11 @@ GELO = main.Gelo()
 
 def main():
     """Parse the command line arguments into a Gelo configuration."""
+    # This is a linux-ism, but w/e
+    if 'SUDO_USER' in os.environ.keys():
+        home_folder = os.path.expanduser("~" + os.environ['SUDO_USER'])
+    else:
+        home_folder = os.path.expandvars("$HOME")
     # Construct the parser
     parser = argparse.ArgumentParser(prog='gelo')
     parser.add_argument('show',
@@ -17,8 +22,8 @@ def main():
                         ' fnt-192')
     parser.add_argument('-c',
                         '--config',
-                        default=os.path.expandvars(
-                            '$HOME/.config/gelo/gelo.ini'),
+                        default=os.path.join(home_folder,
+                                             '.config/gelo/gelo.ini'),
                         type=open,
                         help='path to configuration file')
     parser.add_argument('-p',
