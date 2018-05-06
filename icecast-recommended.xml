@@ -1,0 +1,34 @@
+<icecast>
+    <location><!-- YOUR LOCATION HERE --></location>
+    <admin><!-- YOUR EMAIL HERE --></admin>
+    <limits>
+        <clients>10</clients>
+        <sources>1</sources>
+        <queue-size>524288</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+    </limits>
+    <authentication>
+        <source-password><!-- YOUR PASSWORD HERE --></source-password>
+        <relay-password>D98Wn2K86948HuXENnZbDAX9CxeGWj3W</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>D98Wn2K86948HuXENnZbDAX9CxeGWj3W</admin-password>
+    </authentication>
+    <hostname><!-- YOUR HOSTNAME HERE--></hostname>
+    <listen-socket>
+        <port>8080</port>
+        <bind-address><!-- BIND IP HERE --></bind-address>
+    </listen-socket>
+    <mount type="normal">
+        <mount-name>/traktor.ogg</mount-name>
+        <max-listeners>0</max-listeners>
+    </mount>
+    <fileserve>1</fileserve>
+    <paths>
+        <logdir>/var/log/icecast</logdir>
+        <webroot>/usr/share/icecast/web</webroot>
+        <adminroot>/usr/share/icecast/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+</icecast>
