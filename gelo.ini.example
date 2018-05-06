@@ -6,47 +6,14 @@
 # The location of additional plugins.  Environment variable expansion is
 # performed on this string value.
 user_plugin_dir=$HOME/.config/gelo/plugins
-# unprivileged_user
-# The user for Gelo to drop privileges to
-unprivileged_user = you
-# unprivileged_group
-# The group for Gelo to drop privileges to
-unprivileged_group = yourgroup
 
 #
-# plugin:icecast: Configure the Icecast server metadata source
+# plugin:http_poller: Configure the HTTP poller metadata source
 #
-[plugin:icecast]
-# unprivileged_user
-# The user for Icecast to drop privileges to
-unprivileged_user = you
-# unprivileged_group
-# The group for Icecast to drop privileges to
-unprivileged_group = yourgroup
-# port
-# The port the Icecast server should bind to.
-port=8080
-# bind_address
-# The address the Icecast server should bind to.  A value of 0.0.0.0 means all
-# interfaces, which is usually not a good idea.
-bind_address=127.0.0.1
-# source_password
-# The password a source (Traktor) must specify to connect to Icecast.
-source_password=correct-horse-battery-staple
-# num_clients
-# The maximum number of permitted clients.  Must be at least 2, a good default
-# is 10.  You should probably leave this alone unless you're also using this
-# Icecast server for other things.
-num_clients = 10 
-# basedir
-# The directory for Icecast to chroot into.  Configuration files will
-# automatically be populated here, and it will be created if it doesn't exist.
-# Environment variable expansion is performed on this string value.
-basedir = $HOME/.config/gelo/icecast
-# config_file
-# The place to put Icecast's configuraiton file.  Environment variables will be
-# expanded, and it doesn't have to be a subdirectory of basedir above.
-config_file = $HOME/.config/gelo/icecast.xml
+[plugin:http_poller]
+# poll_url
+# The URL to poll for markers
+poll_url=http://localhost:8080/nowplaying.xsl
 # prefix_file
 # The place to look for the now playing prefix.  This is sort of a hack, unless
 # I find a better way of doing what I want to accomplish.  If there is any text
