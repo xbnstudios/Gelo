@@ -5,6 +5,6 @@ Module = tweeter
 [Documentation]
 Description = Tweet the marker.
 Author = s0ph0s
-Version = 0.1.0
+Version = 1.0.0
 Website = https://github.com/s0ph0s-2/Gelo
 
