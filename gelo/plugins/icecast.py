@@ -3,7 +3,7 @@ import re
 import requests
 import requests.exceptions
 from gelo import arch, conf
-from shutil import chown
+from shutil import chown, which
 # from shutil import copyfile, chown
 from subprocess import Popen
 from time import time, sleep
@@ -81,12 +81,16 @@ class Icecast(arch.IMarkerSource):
         # Match anything inside parenthesis
         self.special_matcher = re.compile(r".*\((.*)\).*")
         self.setup_environment()
+        if which('icecast2') is not None:
+            self.icecast = 'icecast2'
+        else:
+            self.icecast = 'icecast'
 
     def run(self):
         """Run the code that creates markers from Icecast.
         This should be run as a thread."""
         # Fork Icecast
-        Popen(['icecast', '-c', self.config['config_file']])
+        Popen([self.icecast, '-c', self.config['config_file']])
         sleep(1)
         starttime = time()
         while not self.should_terminate:
