@@ -70,14 +70,14 @@ class IRC(gelo.arch.IMarkerSink):
             c = reactor.server().connect(self.server, self.port, self.nick,
                                          connect_factory=factory)
             self.log.debug("Connected!")
-        except irc.client.ServerConnectionError:
-            self.log.critical("IRC connection error: " + sys.exc_info()[1])
-            raise SystemExit(1)
-        c.add_global_handler("welcome", self.on_connect)
-        c.add_global_handler("disconnect", self.on_disconnect)
-        c.add_global_handler("join", self.on_join)
+            c.add_global_handler("welcome", self.on_connect)
+            c.add_global_handler("disconnect", self.on_disconnect)
+            c.add_global_handler("join", self.on_join)
 
-        reactor.process_forever()
+            while not self.should_terminate:
+                reactor.process_once(timeout=0.2)
+        except irc.client.ServerConnectionError:
+            self.log.critical("IRC connection error: " + str(sys.exc_info()[1]))
 
     def main_loop(self, connection: irc.client.connection):
         """Fetch new markers from the queue and send them in IRC.
