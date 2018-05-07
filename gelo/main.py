@@ -80,11 +80,12 @@ class Gelo(object):
             self.l.info("Starting %s..." %
                         plugin.plugin_object.PLUGIN_MODULE_NAME)
             plugin.plugin_object.start()
-        for plugin in self.gpm.getAllPlugins():
-            plugin.plugin_object.join()
 
         s = shell.GeloShell(self, self.gpm)
         s.cmdloop()
+
+        for plugin in self.gpm.getAllPlugins():
+            plugin.plugin_object.join()
 
     def shutdown(self):
         self.l.info("Shutting down...")

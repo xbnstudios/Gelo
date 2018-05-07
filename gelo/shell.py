@@ -1,4 +1,3 @@
-import gelo.main
 import cmd
 import readline
 from yapsy import PluginManager
@@ -9,7 +8,7 @@ class GeloShell(cmd.Cmd):
             "commands.\n"
     prompt = "> "
 
-    def __init__(self, g: gelo.main.Gelo, pm: PluginManager.PluginManager,
+    def __init__(self, g, pm: PluginManager.PluginManager,
                  completekey='tab', stdin=None, stdout=None):
         """Create a new GeloShell.
 
@@ -28,7 +27,7 @@ class GeloShell(cmd.Cmd):
         """When the user enters an empty line, do nothing."""
         pass
 
-    def do_quit(self):
+    def do_quit(self, arg):
         """Exit the shell."""
-        self.close()
+        self.gelo.shutdown()
         return True
