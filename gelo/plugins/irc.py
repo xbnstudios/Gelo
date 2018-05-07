@@ -48,7 +48,7 @@ class IRC(gelo.arch.IMarkerSink):
             self.main_loop(connection)
 
     def on_disconnect(self, connection, event):
-        self.info("IRC server disconnected.")
+        self.log.info("IRC server disconnected.")
         self.should_terminate = True
 
     def on_join(self, connection, event):
