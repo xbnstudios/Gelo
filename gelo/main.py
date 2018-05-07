@@ -3,7 +3,7 @@
 import os
 import logging
 from time import time
-from gelo import arch, mediator
+from gelo import arch, mediator, shell
 from yapsy import PluginManager, PluginFileLocator
 
 
@@ -82,6 +82,9 @@ class Gelo(object):
             plugin.plugin_object.start()
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.join()
+
+        s = shell.GeloShell(self, self.gpm)
+        s.cmdloop()
 
     def shutdown(self):
         self.l.info("Shutting down...")
