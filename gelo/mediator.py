@@ -1,6 +1,6 @@
-import gelo
 import gelo.arch
 import queue
+import logging
 from time import time
 from threading import Lock
 from functools import partial
@@ -17,6 +17,7 @@ class Mediator(gelo.arch.IMediator):
         self.channels = {}
         self.channel_lock = Lock()
         self.first_time = None
+        self.log = logging.getLogger("gelo.mediator")
 
     def publish(self, marker_type: gelo.arch.MarkerType, marker:
                 gelo.arch.Marker) -> None:
@@ -27,14 +28,18 @@ class Mediator(gelo.arch.IMediator):
             raise ValueError()
         if not marker:
             raise ValueError()
+        self.log.info("Received new marker: %s" % marker)
         if self.first_time is None:
-            self.first_time = time()
+            t = time()
+            self.log.debug("First time is none. Setting to %s" % t)
+            self.first_time = t
         marker.time = time() - self.first_time
         if marker_type not in self.channels:
             self.channel_lock.acquire()
             if marker_type not in self.channels:
                 self.channels[marker_type] = []
             self.channel_lock.release()
+        self.log.debug("Pushing marker to queues for %s" % marker_type)
         for q in self.channels[marker_type]:
             if q.qsize() > self.QUEUE_MAX:
                 q.put(None, block=False)
@@ -49,6 +54,7 @@ class Mediator(gelo.arch.IMediator):
             raise ValueError()
         if len(marker_types) < 1:
             raise ValueError()
+        self.log.info("New subscriber to %s" % marker_types)
         q = queue.Queue()
         q.listen = partial(self.listen, q)
         for marker_type in marker_types:
@@ -64,6 +70,7 @@ class Mediator(gelo.arch.IMediator):
         """Close all of the queues so the plugins can terminate."""
         self.channel_lock.acquire()
         for channel in self.channels:
+            self.log.info("Terminating channel %s" % channel)
             for q in self.channels[channel]:
                 q.put(None, block=False)
 

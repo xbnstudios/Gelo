@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Gelo: a podcast chapter metadata gathering tool"""
 import os
+import logging
+from time import time
 from gelo import arch, mediator
 from yapsy import PluginManager, PluginFileLocator
 
@@ -52,6 +54,10 @@ class GeloPluginManager(PluginManager.PluginManager):
 class Gelo(object):
     def main(self, configuration):
         """Use the provided configuration to load all plugins and run Gelo."""
+        logging.basicConfig(filename=configuration.log_file)
+        self.l = logging.getLogger("gelo")
+        self.l.setLevel(configuration.log_level)
+        self.l.info("Starting gelo at %s" % time())
         pfa = PluginFileLocator.PluginFileAnalyzerWithInfoFile(
             'gelo_info_ext',
             extensions='gelo-plugin'
@@ -62,17 +68,25 @@ class Gelo(object):
         pfl.setPluginPlaces(
             [BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir]
         )
+        self.l.info("Plugin locations: %s" % (
+            [BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir]))
         self.gpm = GeloPluginManager(plugin_locator=pfl)
         self.m = mediator.Mediator()
         self.gpm.set_cms(configuration, self.m, configuration.show)
+        self.l.info("Collecting plugins...")
         self.gpm.collectPlugins()
 
         for plugin in self.gpm.getAllPlugins():
+            self.l.info("Starting %s..." %
+                        plugin.plugin_object.PLUGIN_MODULE_NAME)
             plugin.plugin_object.start()
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.join()
 
     def shutdown(self):
+        self.l.info("Shutting down...")
         self.m.terminate()
         for plugin in self.gpm.getAllPlugins():
+            self.l.info("Telling %s to exit..." %
+                        plugin.plugin_object.PLUGIN_MODULE_NAME)
             plugin.plugin_object.exit()

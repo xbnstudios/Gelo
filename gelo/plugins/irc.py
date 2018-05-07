@@ -4,6 +4,7 @@ import gelo.mediator
 import sys
 import ssl
 import queue
+import logging
 import irc.client
 
 
@@ -14,13 +15,17 @@ class IRC(gelo.arch.IMarkerSink):
 
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         super().__init__(config, mediator, show)
+        self.log = logging.getLogger("gelo.plugins.irc")
         self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
         self.validate_config()
+        self.log.debug("Configuration validated")
         self.nick = self.config['nick']
         if self.config['nickserv_pass'] != '':
+            self.log.debug("Enabling NickServ authentication")
             self.nickserv_enable = True
             self.nickserv_pass = self.config['nickserv_pass']
         else:
+            self.log.debug("Disabling NickServ authentication")
             self.nickserv_enable = False
         self.server = self.config['server']
         self.port = int(self.config['port'])
@@ -47,6 +52,7 @@ class IRC(gelo.arch.IMarkerSink):
 
     def run(self):
         """Run the code that will receive markers and post them to IRC."""
+        self.log.debug("Plugin started")
         reactor = irc.client.Reactor()
         try:
             wrapper = ssl.wrap_socket if self.tls else \
@@ -56,7 +62,7 @@ class IRC(gelo.arch.IMarkerSink):
             c = reactor.server().connect(self.server, self.port, self.nick,
                                          connect_factory=factory)
         except irc.client.ServerConnectionError:
-            print(sys.exc_info()[1])
+            self.log.critical("IRC connection error: " + sys.exc_info()[1])
             raise SystemExit(1)
         c.add_global_handler("welcome", self.on_connect)
         c.add_global_handler("disconnect", self.on_disconnect)
@@ -70,15 +76,16 @@ class IRC(gelo.arch.IMarkerSink):
         :param connection: The connection to the IRC server to send messages
         via.
         """
+        self.log.debug("Starting main loop")
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen(timeout=0.5))
+                self.log.debug("Received marker from channel: %s" % marker)
                 self.send_message(marker, connection)
-#             except StopIteration:
-#                 continue
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
+                self.log.info("Channel closed. Exiting...")
                 self.should_terminate = True
                 connection.quit(message="Metadata system shutdown")
 
@@ -96,11 +103,13 @@ class IRC(gelo.arch.IMarkerSink):
             for item in self.repeat_with:
                 to_send = self.message.format(marker=marker.label.strip("\n"),
                                               special=special, item=item)
+                self.log.debug("Sending message: %s" % to_send)
                 c.privmsg(self.send_to, to_send)
         else:
             # Send just one message
             to_send = self.message.format(marker=marker.label.strip("\n"),
                                           special=special)
+            self.log.debug("Sending message: %s" % to_send)
             c.privmsg(self.send_to, to_send)
 
     def validate_config(self):

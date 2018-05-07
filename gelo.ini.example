@@ -6,6 +6,10 @@
 # The location of additional plugins.  Environment variable expansion is
 # performed on this string value.
 user_plugin_dir=$HOME/.config/gelo/plugins
+# log_file
+# The file to log to.  Environment variable expansion is performed on this
+# string value.
+log_file=$HOME/.config/gelo/gelo.log
 
 #
 # plugin:http_poller: Configure the HTTP poller metadata source

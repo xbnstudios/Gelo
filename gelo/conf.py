@@ -1,5 +1,6 @@
 import configparser
 import argparse
+import os
 
 
 class Configuration(object):
@@ -12,13 +13,16 @@ class Configuration(object):
         self.validate_config_file(config_file)
         self.user_plugin_dir = ""
         if 'user_plugin_dir' in config_file['core']:
-            self.user_plugin_dir = config_file['core']['user_plugin_dir']
+            self.user_plugin_dir = os.path.expandvars(config_file['core'][
+                'user_plugin_dir'])
         if args.user_plugin_dir != '':
             self.user_plugin_dir = args.user_plugin_dir
         self.plugins = [plugin.split(':')[1] for plugin in config_file.keys()
                         if plugin.startswith('plugin:')]
+        self.log_file = os.path.expandvars(config_file['core']['log_file'])
         self.configparser = config_file
         self.show = args.show
+        self.log_level = args.verbosity
 
     @staticmethod
     def validate_config_file(config_file: configparser.ConfigParser):
@@ -28,6 +32,8 @@ class Configuration(object):
         errors = []
         if 'core' not in config_file:
             errors.append('Required config section [core] missing.')
+        if 'log_file' not in config_file['core'].keys():
+            errors.append('[core] is missing the required key "log_file"')
         if len(errors) > 0:
             raise InvalidConfigurationError(errors)
 
