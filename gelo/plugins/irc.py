@@ -37,17 +37,22 @@ class IRC(gelo.arch.IMarkerSink):
         self.message = self.config['message']
 
     def on_connect(self, connection, event):
+        self.log.debug("Finished connecting to IRC")
         if self.nickserv_enable:
             connection.privmsg('nickserv', 'identify %s' % self.nickserv_pass)
+            self.log.debug("Sent NickServ auth message")
         if irc.client.is_channel(self.send_to):
+            self.log.debug("Joining output channel")
             connection.join(self.send_to)
         else:
             self.main_loop(connection)
 
     def on_disconnect(self, connection, event):
+        self.info("IRC server disconnected.")
         self.should_terminate = True
 
     def on_join(self, connection, event):
+        self.log.debug("Joined output channel")
         self.main_loop(connection)
 
     def run(self):
@@ -59,8 +64,12 @@ class IRC(gelo.arch.IMarkerSink):
                 irc.client.connection.identity
             factory = irc.client.connection.Factory(ipv6=self.ipv6,
                                                     wrapper=wrapper)
+            self.log.debug("Attempting to connect to %s:%s with nick %s" % (
+                self.server, self.port, self.nick
+            ))
             c = reactor.server().connect(self.server, self.port, self.nick,
                                          connect_factory=factory)
+            self.log.debug("Connected!")
         except irc.client.ServerConnectionError:
             self.log.critical("IRC connection error: " + sys.exc_info()[1])
             raise SystemExit(1)
@@ -79,13 +88,14 @@ class IRC(gelo.arch.IMarkerSink):
         self.log.debug("Starting main loop")
         while not self.should_terminate:
             try:
-                marker = next(self.channel.listen(timeout=0.5))
+                marker = next(self.channel.listen())
                 self.log.debug("Received marker from channel: %s" % marker)
                 self.send_message(marker, connection)
             except queue.Empty:
+                self.log.debug("Queue empty, continuing...")
                 continue
             except gelo.mediator.UnsubscribeException:
-                self.log.info("Channel closed. Exiting...")
+                self.log.info("Queue closed, exiting...")
                 self.should_terminate = True
                 connection.quit(message="Metadata system shutdown")
 
