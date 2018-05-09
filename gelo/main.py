@@ -79,9 +79,9 @@ class Gelo(object):
         for plugin in self.gpm.getAllPlugins():
             self.l.info("Starting %s..." %
                         plugin.plugin_object.PLUGIN_MODULE_NAME)
-            plugin.plugin_object.start()
+            plugin.plugin_object.activate()
 
-        s = shell.GeloShell(self, self.gpm)
+        s = shell.GeloShell(self, self.gpm, self.m, configuration.macro_file)
         s.cmdloop()
 
         for plugin in self.gpm.getAllPlugins():
@@ -93,4 +93,4 @@ class Gelo(object):
         for plugin in self.gpm.getAllPlugins():
             self.l.info("Telling %s to exit..." %
                         plugin.plugin_object.PLUGIN_MODULE_NAME)
-            plugin.plugin_object.exit()
+            plugin.plugin_object.deactivate()

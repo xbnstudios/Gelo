@@ -1,5 +1,6 @@
 import gelo.arch
 import gelo.conf
+import gelo.mediator
 import queue
 import logging
 import twitter
@@ -32,6 +33,7 @@ class Tweeter(gelo.arch.IMarkerSink):
                 continue
             except gelo.mediator.UnsubscribeException:
                 self.should_terminate = True
+        self.is_activated = False
 
     def tweet(self, marker: gelo.arch.Marker):
         """Connect to Twitter and tweet the track."""
@@ -47,7 +49,6 @@ class Tweeter(gelo.arch.IMarkerSink):
                 self.log.warning("Twitter rejected duplicate status. Ignoring.")
             else:
                 raise e
-
 
     def get_api(self):
         """Get a Twitter API object from the python-twitter module."""

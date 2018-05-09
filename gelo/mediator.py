@@ -17,6 +17,8 @@ class Mediator(gelo.arch.IMediator):
         self.channels = {}
         self.channel_lock = Lock()
         self.first_time = None
+        self.shouldSquelchNext = False
+        self.stopped = False
         self.log = logging.getLogger("gelo.mediator")
 
     def publish(self, marker_type: gelo.arch.MarkerType, marker:
@@ -29,6 +31,13 @@ class Mediator(gelo.arch.IMediator):
         if not marker:
             raise ValueError()
         self.log.info("Received new marker: %s" % marker)
+        if self.shouldSquelchNext:
+            self.log.debug("Ignoring marker because squelch")
+            self.shouldSquelchNext = False
+            return
+        if self.stopped:
+            self.log.debug("Ignoring marker because stopped")
+            return
         if self.first_time is None:
             t = time()
             self.log.debug("First time is none. Setting to %s" % t)
