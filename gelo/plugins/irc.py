@@ -96,7 +96,7 @@ class IRC(gelo.arch.IMarkerSink):
             self.log.debug("Received marker from channel: %s" % marker)
             self.send_message(marker, connection)
         except StopIteration:
-            self.log.debug("Received no marker from channel. Continuing")
+            return
         except queue.Empty:
             self.log.debug("Queue empty, continuing...")
         except gelo.mediator.UnsubscribeException:
