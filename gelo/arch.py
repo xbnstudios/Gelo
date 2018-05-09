@@ -91,10 +91,12 @@ class IMediator(object):
         :event_label: The actual text of the event"""
         pass
 
-    def subscribe(self, event_types: MarkerTypeList):
+    def subscribe(self, event_types: MarkerTypeList, subscriber: str):
         """Subscribe to all of the listed event types.
-
-        :event_types: The types of events to subscribe to
+        :param event_types: The types of events to subscribe to
+        :param subscriber: The name of the plugin that's subscribing to
+        messages.  This should be the class name of the plugin, unless you
+        like undefined behavior.
         """
         pass
 
