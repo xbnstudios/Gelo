@@ -54,7 +54,9 @@ class GeloPluginManager(PluginManager.PluginManager):
 class Gelo(object):
     def main(self, configuration):
         """Use the provided configuration to load all plugins and run Gelo."""
-        logging.basicConfig(filename=configuration.log_file)
+        logging.basicConfig(filename=configuration.log_file,
+                            format='%(asctime)s %(levelname)-8s %(name)s:%('
+                                   'message)s')
         self.l = logging.getLogger("gelo")
         self.l.setLevel(configuration.log_level)
         self.l.info("Starting gelo at %s" % time())
