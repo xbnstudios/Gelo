@@ -125,5 +125,7 @@ message=Now Playing{special}: {marker}
 # path
 # The path to write the file to. Environment variable expansion is performed on
 # this string value, and "{show}" will be replaced by the show that Gelo was
-# started with.
-path=$HOME/Desktop/audacity.csv
+# started with. Additionally, "{count}" will be replaced with a 4-character,
+# zero-padded number to avoid overwriting existing files with the same name.
+# Audacity expects this file to end with ".txt".
+path=$HOME/Desktop/{show}-{count}.txt
