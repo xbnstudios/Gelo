@@ -1,6 +1,7 @@
 import cmd
-from gelo import mediator, arch
+from gelo import mediator, arch, main
 import configparser
+import logging
 import readline
 from yapsy import PluginManager
 
@@ -91,16 +92,18 @@ class GeloShell(cmd.Cmd):
             "commands.\n"
     prompt = "> "
 
-    def __init__(self, g, pm: PluginManager.PluginManager, m: mediator.Mediator,
+    def __init__(self, g, pm, m: mediator.Mediator,
                  macro_file, completekey='tab', stdin=None, stdout=None):
         """Create a new GeloShell.
 
         This method first calls the parent constructor, then saves the
         instances of Gelo and the Plugin Manager that were passed in.
 
-        :param g: The running instance of Gelo to control.
+        :param g: The running instance of Gelo to control. Not type hinted
+        because Python weirdness?
+        :param pm: The GeloPluginManager in use by ``g``. Also not type hinted
         :param m: The Mediator that's currently passing Messages.
-        :param pm: The PluginManager in use by ``g``.
+        because Python weirdness?
         :param macro_file: The path to the file in which macros are saved.
         """
         super(GeloShell, self).__init__(completekey=completekey, stdin=stdin,
@@ -110,6 +113,7 @@ class GeloShell(cmd.Cmd):
         self.plugin_manager = pm
         tmp = configparser.ConfigParser()
         self.macro_file = macro_file
+        self.log = logging.getLogger(__name__)
 
     def emptyline(self):
         """When the user enters an empty line, do nothing."""
@@ -136,13 +140,13 @@ class GeloShell(cmd.Cmd):
         Usage: `start`"""
         self.mediator.stopped = False
 
-    def do_load(self, arg):
-        """Load the named plugin.
+    def do_enable(self, arg):
+        """Enable the named plugin.
 
         An error message is printed when the plugin does not exist, and the
-        command is silently ignored if the plugin is already loaded.
+        command is silently ignored if the plugin is already enabled.
 
-        Usage: `load http_poller`"""
+        Usage: `enable HttpPoller`"""
         if ' ' in arg:
             print("gelo: load: invalid command format")
             return False
@@ -150,17 +154,18 @@ class GeloShell(cmd.Cmd):
         if plugin is None:
             print("gelo: load: nonexistent plugin \"%s\"" % arg)
             return False
-        if plugin.is_activated:
+        if plugin.plugin_object.is_enabled:
             return False
-        self.plugin_manager.activatePluginByName(arg)
+        self.plugin_manager.enablePluginByName(arg)
+        self.log.info("Plugin enabled: %s" % arg)
 
-    def do_unload(self, arg):
-        """Unload the named plugin.
+    def do_disable(self, arg):
+        """Disable the named plugin.
 
         An error message is printed when the plugin does not exist, and the
-        command is silently ignored if the plugin is already unloaded.
+        command is silently ignored if the plugin is already disabled.
 
-        Usage: `unload http_poller`"""
+        Usage: `disable HttpPoller`"""
         if ' ' in arg:
             print("gelo: unload: invalid command format")
             return False
@@ -168,10 +173,10 @@ class GeloShell(cmd.Cmd):
         if plugin is None:
             print("gelo: unload: nonexistent plugin \"%s\"" % arg)
             return False
-        if not plugin.is_activated:
+        if not plugin.plugin_object.is_enabled:
             return False
-        self.plugin_manager.deactivatePluginByName(arg)
-        self.mediator.close_subscriber(arg)
+        self.plugin_manager.disablePluginByName(arg)
+        self.log.info("Plugin disabled: %s" % arg)
 
     def do_define(self, arg):
         """Define a macro, with the given name.
@@ -226,38 +231,6 @@ class GeloShell(cmd.Cmd):
 
         Usage: `undefine a_macro`"""
         pass
-
-    def do_e(self, arg):
-        """Alias for `squelch`."""
-        self.do_squelch(arg)
-
-    def do_s(self, arg):
-        """Alias for `stop`."""
-        self.do_stop(arg)
-
-    def do_t(self, arg):
-        """Alias for `start`."""
-        self.do_start(arg)
-
-    def do_l(self, arg):
-        """Alias for `load`."""
-        self.do_load(arg)
-
-    def do_u(self, arg):
-        """Alias for `unload`."""
-        self.do_unload(arg)
-
-    def do_d(self, arg):
-        """Alias for `define`."""
-        self.do_define(arg)
-
-    def do_f(self, arg):
-        """Alias for `undefine`."""
-        self.do_undefine(arg)
-
-    def do_i(self, arg):
-        """Alias for `inject`."""
-        self.do_inject(arg)
 
     def default(self, line):
         """Try running a macro, or display an error message."""

@@ -90,6 +90,8 @@ class IRC(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 self.log.debug("Received marker from channel: %s" % marker)
                 self.send_message(marker, connection)
             except queue.Empty:

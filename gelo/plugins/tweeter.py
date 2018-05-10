@@ -28,13 +28,14 @@ class Tweeter(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 self.log.debug("Received marker from channel: %s" % marker)
                 self.tweet(marker)
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
                 self.should_terminate = True
-        self.is_activated = False
 
     def tweet(self, marker: gelo.arch.Marker):
         """Connect to Twitter and tweet the track."""
@@ -84,4 +85,4 @@ class Tweeter(gelo.arch.IMarkerSink):
 
 def register():
     """Authorize this app to tweet from your account."""
-    print('I haven\'t written this yet. Check back in v1.1.')
+    print('I haven\'t written this yet. Check back in v1.3.')

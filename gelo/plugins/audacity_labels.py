@@ -25,6 +25,8 @@ class AudacityLabels(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 current_marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 if self.last_marker is not None:
                     line = self.create_line(current_marker)
                     with open(self.config['path'], 'a') as f:

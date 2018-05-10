@@ -121,6 +121,7 @@ class IMarkerSource(Thread, IPlugin):
         self.mediator = mediator
         self.should_terminate = False
         self.show = show
+        self.is_enabled = True
 
     def activate(self):
         """Activate the plugin by calling the start method.
@@ -139,6 +140,23 @@ class IMarkerSource(Thread, IPlugin):
         this method to implement the functionality of their plugin.
         """
         pass
+
+    def enable(self):
+        """Enable the functionality of this plugin.
+
+        Tell the plugin that it should do whatever it is it's supposed to be
+        doing.
+        """
+        self.is_enabled = True
+
+    def disable(self):
+        """Disable the functionality of this plugin.
+
+        Tell the plugin to stop doing whatever it is it's supposed to be doing.
+        When in this disabled state, the plugin *should* continue consuming
+        events from the event queue, but it *should not* act on them.
+        """
+        self.is_enabled = False
 
     def deactivate(self):
         """Deactivate the plugin.
@@ -173,7 +191,7 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         self.mediator = mediator
         self.show = show
         self.should_terminate = False
-        self.is_activated = False
+        self.is_enabled = True
 
     def activate(self):
         """Activate the plugin by calling the start method.
@@ -184,7 +202,6 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         the plugin thread to be created and run.
         """
         self.start()
-        self.is_activated = True
 
     def run(self):
         """The main function of the plugin.
@@ -194,12 +211,31 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         """
         pass
 
+    def enable(self):
+        """Enable the functionality of this plugin.
+
+        Tell the plugin that it should do whatever it is it's supposed to be
+        doing.
+        """
+        self.is_enabled = True
+
+    def disable(self):
+        """Disable the functionality of this plugin.
+
+        Tell the plugin to stop doing whatever it is it's supposed to be doing.
+        When in this disabled state, the plugin *should* continue consuming
+        events from the event queue, but it *should not* act on them.
+        """
+        self.is_enabled = False
+
     def deactivate(self):
         """Deactivate the plugin.
 
-        Because plugins are threaded, it may be necessary to call ``join()``
-        on the plugin object after calling this method, in order to wait for
-        the plugin to finish its work and stop.
+        Because plugins are threaded, it may be necessary to call ``join()`` on
+        the plugin object after calling this method, in order to wait for the
+        plugin to finish its work and stop. Note that because threads cannot be
+        started again after they've been stopped, once a plugin is deactivated,
+        it cannot be reactivated again without restarting the application.
         """
         self.should_terminate = True
 
