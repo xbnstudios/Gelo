@@ -15,8 +15,12 @@ class Mediator(gelo.arch.IMediator):
         """Create a new instance of this Mediator."""
         super().__init__()
         self.channels = {}
+        self.subscriber_map = {}
         self.channel_lock = Lock()
+        self.subscriber_lock = Lock()
         self.first_time = None
+        self.shouldSquelchNext = False
+        self.stopped = False
         self.log = logging.getLogger("gelo.mediator")
 
     def publish(self, marker_type: gelo.arch.MarkerType, marker:
@@ -29,6 +33,13 @@ class Mediator(gelo.arch.IMediator):
         if not marker:
             raise ValueError()
         self.log.info("Received new marker: %s" % marker)
+        if self.shouldSquelchNext:
+            self.log.debug("Ignoring marker because squelch")
+            self.shouldSquelchNext = False
+            return
+        if self.stopped:
+            self.log.debug("Ignoring marker because stopped")
+            return
         if self.first_time is None:
             t = time()
             self.log.debug("First time is none. Setting to %s" % t)
@@ -46,15 +57,21 @@ class Mediator(gelo.arch.IMediator):
                 continue
             q.put(marker, block=False)
 
-    def subscribe(self, marker_types: gelo.arch.MarkerTypeList) -> queue.Queue:
+    def subscribe(self,
+                  marker_types: gelo.arch.MarkerTypeList,
+                  subscriber: str) -> queue.Queue:
         """Subscribe to all of the listed event types.
-        :marker_types: A list of MarkerType types to subscribe to
-        :return: A queue of markers"""
+        :param marker_types: A list of MarkerType types to subscribe to.
+        :param subscriber: The class name of the subscriber.
+        :return: A queue of markers
+        """
         if not marker_types:
             raise ValueError()
         if len(marker_types) < 1:
             raise ValueError()
-        self.log.info("New subscriber to %s" % marker_types)
+        if not subscriber:
+            raise ValueError()
+        self.log.info("New subscriber to %s: %s" % (marker_types, subscriber))
         q = queue.Queue()
         q.listen = partial(self.listen, q)
         for marker_type in marker_types:
@@ -64,6 +81,9 @@ class Mediator(gelo.arch.IMediator):
                     self.channels[marker_type] = []
                 self.channel_lock.release()
             self.channels[marker_type].append(q)
+        self.subscriber_lock.acquire()
+        self.subscriber_map[subscriber] = q
+        self.subscriber_lock.release()
         return q
 
     def terminate(self):
@@ -73,6 +93,17 @@ class Mediator(gelo.arch.IMediator):
             self.log.info("Terminating channel %s" % channel)
             for q in self.channels[channel]:
                 q.put(None, block=False)
+        self.channel_lock.release()
+
+    def close_subscriber(self, subscriber: str):
+        """Close the queue for a given subscriber.
+
+        :param subscriber: The class name of the subscriber to close the
+        queue for.
+        """
+        self.subscriber_lock.acquire()
+        self.subscriber_map[subscriber].put(None, block=False)
+        self.subscriber_lock.release()
 
     @staticmethod
     def listen(q: queue.Queue, block=True, timeout=None):

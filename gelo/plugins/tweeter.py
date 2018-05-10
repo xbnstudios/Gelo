@@ -1,5 +1,6 @@
 import gelo.arch
 import gelo.conf
+import gelo.mediator
 import queue
 import logging
 import twitter
@@ -17,7 +18,8 @@ class Tweeter(gelo.arch.IMarkerSink):
         self.log = logging.getLogger("gelo.plugins.tweeter")
         self.validate_config()
         self.log.debug("Configuration valid")
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               Tweeter.__name__)
         self.api = self.get_api()
 
     def run(self):
@@ -26,6 +28,8 @@ class Tweeter(gelo.arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 self.log.debug("Received marker from channel: %s" % marker)
                 self.tweet(marker)
             except queue.Empty:
@@ -47,7 +51,6 @@ class Tweeter(gelo.arch.IMarkerSink):
                 self.log.warning("Twitter rejected duplicate status. Ignoring.")
             else:
                 raise e
-
 
     def get_api(self):
         """Get a Twitter API object from the python-twitter module."""
@@ -82,4 +85,4 @@ class Tweeter(gelo.arch.IMarkerSink):
 
 def register():
     """Authorize this app to tweet from your account."""
-    print('I haven\'t written this yet. Check back in v1.1.')
+    print('I haven\'t written this yet. Check back in v1.3.')

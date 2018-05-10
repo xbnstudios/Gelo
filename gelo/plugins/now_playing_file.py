@@ -1,29 +1,32 @@
 import os
-import gelo
+from gelo import arch, conf, mediator
 import queue
 
 
-class NowPlayingFile(gelo.arch.IMarkerSink):
+class NowPlayingFile(arch.IMarkerSink):
     """Write the current TRACK marker to a text file."""
 
     PLUGIN_MODULE_NAME = 'now_playing_file'
 
-    def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
+    def __init__(self, config, med: arch.IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""
-        super().__init__(config, mediator, show)
+        super().__init__(config, med, show)
         self.validate_config()
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([arch.MarkerType.TRACK],
+                                               NowPlayingFile.__name__)
 
     def run(self):
         """Run the marker-receiving code."""
         while not self.should_terminate:
             try:
                 marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 with open(self.config['path'], "w") as f:
                     f.write(marker.label)
             except queue.Empty:
                 continue
-            except gelo.mediator.UnsubscribeException:
+            except mediator.UnsubscribeException:
                 self.should_terminate = True
 
     def validate_config(self):
@@ -36,4 +39,4 @@ class NowPlayingFile(gelo.arch.IMarkerSink):
             self.config['path'] = os.path.expandvars(self.config['path'])
         # Return errors, if any
         if len(errors) > 0:
-            raise gelo.conf.InvalidConfigurationError(errors)
+            raise conf.InvalidConfigurationError(errors)

@@ -20,9 +20,10 @@ class Configuration(object):
         self.plugins = [plugin.split(':')[1] for plugin in config_file.keys()
                         if plugin.startswith('plugin:')]
         self.log_file = os.path.expandvars(config_file['core']['log_file'])
+        self.macro_file = os.path.expandvars(config_file['core']['macro_file'])
         self.configparser = config_file
         self.show = args.show
-        self.log_level = args.verbosity
+        self.log_level = args.log_level
 
     @staticmethod
     def validate_config_file(config_file: configparser.ConfigParser):
@@ -34,6 +35,8 @@ class Configuration(object):
             errors.append('Required config section [core] missing.')
         if 'log_file' not in config_file['core'].keys():
             errors.append('[core] is missing the required key "log_file"')
+        if 'macro_file' not in config_file['core'].keys():
+            errors.append('[core] is missing the required key "macro_file"')
         if len(errors) > 0:
             raise InvalidConfigurationError(errors)
 

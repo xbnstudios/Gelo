@@ -26,6 +26,8 @@ class HttpPoller(arch.IMarkerSource):
         starttime = time()
         while not self.should_terminate:
             sleep(0.25 - ((time() - starttime) % 0.25))
+            if not self.is_enabled:
+                continue
             try:
                 track = self.poll_server()
             except requests.exceptions.ConnectionError:

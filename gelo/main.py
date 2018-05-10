@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Gelo: a podcast chapter metadata gathering tool"""
+"""A podcast chapter metadata gathering tool"""
 import os
 import logging
 from time import time
-from gelo import arch, mediator
+from gelo import arch, mediator, shell
 from yapsy import PluginManager, PluginFileLocator
 
 
@@ -50,6 +50,34 @@ class GeloPluginManager(PluginManager.PluginManager):
         this class will automatically upgrade to the not-stupid version."""
         return element(self.config.configparser, self.mediator, self.show)
 
+    def enablePluginByName(self, name, category="Default"):
+        """Enable the named plugin in the given category.
+
+        :param name: The name of the plugin to enable.
+        :param category: The category that plugin is in.
+        """
+        to_enable = self.getPluginByName(name, category)
+        if to_enable is not None:
+            eo = to_enable.plugin_object
+            if eo is not None:
+                eo.enable()
+                return eo
+        return None
+
+    def disablePluginByName(self, name, category="Default"):
+        """Disable the named plugin in the given category.
+
+        :param name: The name of the plugin to disable.
+        :param category: The category that plugin is in.
+        """
+        to_disable = self.getPluginByName(name, category)
+        if to_disable is not None:
+            do = to_disable.plugin_object
+            if do is not None:
+                do.disable()
+                return do
+        return None
+
 
 class Gelo(object):
     def main(self, configuration):
@@ -81,7 +109,11 @@ class Gelo(object):
         for plugin in self.gpm.getAllPlugins():
             self.l.info("Starting %s..." %
                         plugin.plugin_object.PLUGIN_MODULE_NAME)
-            plugin.plugin_object.start()
+            plugin.plugin_object.activate()
+
+        s = shell.GeloShell(self, self.gpm, self.m, configuration.macro_file)
+        s.cmdloop()
+
         for plugin in self.gpm.getAllPlugins():
             plugin.plugin_object.join()
 
@@ -91,4 +123,4 @@ class Gelo(object):
         for plugin in self.gpm.getAllPlugins():
             self.l.info("Telling %s to exit..." %
                         plugin.plugin_object.PLUGIN_MODULE_NAME)
-            plugin.plugin_object.exit()
+            plugin.plugin_object.deactivate()

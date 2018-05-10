@@ -1,8 +1,7 @@
 import os
 import queue
 import logging
-import gelo.mediator
-from gelo import arch, conf
+from gelo import arch, conf, mediator
 
 
 class AudacityLabels(arch.IMarkerSink):
@@ -14,13 +13,14 @@ class AudacityLabels(arch.IMarkerSink):
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""
         super().__init__(config, mediator, show)
-        self.log = logging.getLogger("gelo.plugin.audacity_labels")
+        self.log = logging.getLogger(__name__)
         self.validate_config()
         self.log.debug("Configuration validated")
         self.collision_count = 0
         self.filename = self.avoid_overwrite_filename()
         self.log.info("Using %s as the data file path" % self.filename)
-        self.channel = self.mediator.subscribe([arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([arch.MarkerType.TRACK],
+                                               AudacityLabels.__name__)
         self.last_marker = None
 
     def run(self):
@@ -28,6 +28,8 @@ class AudacityLabels(arch.IMarkerSink):
         while not self.should_terminate:
             try:
                 current_marker = next(self.channel.listen())
+                if not self.is_enabled:
+                    continue
                 self.log.debug("Received marker from channel: %s" %
                                current_marker)
                 if self.last_marker is not None:
@@ -40,7 +42,7 @@ class AudacityLabels(arch.IMarkerSink):
                     continue
             except queue.Empty:
                 continue
-            except gelo.mediator.UnsubscribeException:
+            except mediator.UnsubscribeException:
                 self.should_terminate = True
         if self.last_marker is not None:
             self.log.info("Writing final marker to file")
@@ -51,7 +53,7 @@ class AudacityLabels(arch.IMarkerSink):
                     label=self.last_marker.label
                 ))
 
-    def create_line(self, marker: gelo.arch.Marker) -> str:
+    def create_line(self, marker: arch.Marker) -> str:
         """Create a line for the file using the current marker and the last one.
         """
         return self.LINE_TEMPLATE.format(
@@ -104,4 +106,4 @@ class AudacityLabels(arch.IMarkerSink):
             self.config['path'] = self.config['path'].format(show=self.show)
         # Return errors, if any
         if len(errors) > 0:
-            raise gelo.conf.InvalidConfigurationError(errors)
+            raise conf.InvalidConfigurationError(errors)
