@@ -36,6 +36,7 @@ class IRC(gelo.arch.IMarkerSink):
         self.repeat_with = self.config['repeat_with'].split(",") if \
             'repeat_with' in self.config.keys() else None
         self.message = self.config['message']
+        self.ready = False
 
     def on_connect(self, connection, event):
         self.log.debug("Finished connecting to IRC")
@@ -46,7 +47,7 @@ class IRC(gelo.arch.IMarkerSink):
             self.log.debug("Joining output channel")
             connection.join(self.send_to)
         else:
-            self.main_loop(connection)
+            self.ready = True
 
     def on_disconnect(self, connection, event):
         self.log.info("IRC server disconnected.")
@@ -54,7 +55,7 @@ class IRC(gelo.arch.IMarkerSink):
 
     def on_join(self, connection, event):
         self.log.debug("Joined output channel")
-        self.main_loop(connection)
+        self.ready = True
 
     def run(self):
         """Run the code that will receive markers and post them to IRC."""
@@ -77,30 +78,34 @@ class IRC(gelo.arch.IMarkerSink):
 
             while not self.should_terminate:
                 reactor.process_once(timeout=0.2)
+                self.main_once(c)
         except irc.client.ServerConnectionError:
             self.log.critical("IRC connection error: " + str(sys.exc_info()[1]))
 
-    def main_loop(self, connection: irc.client.connection):
+    def main_once(self, connection: irc.client.connection, timeout=0.2):
         """Fetch new markers from the queue and send them in IRC.
 
         :param connection: The connection to the IRC server to send messages
         via.
+        :param timeout: The length of time (in seconds, float) to wait before
+        continuing.
         """
-        self.log.debug("Starting main loop")
-        while not self.should_terminate:
-            try:
-                marker = next(self.channel.listen())
-                if not self.is_enabled:
-                    continue
-                self.log.debug("Received marker from channel: %s" % marker)
-                self.send_message(marker, connection)
-            except queue.Empty:
-                self.log.debug("Queue empty, continuing...")
-                continue
-            except gelo.mediator.UnsubscribeException:
-                self.log.info("Queue closed, exiting...")
-                self.should_terminate = True
-                connection.quit(message="Metadata system shutdown")
+        if not self.ready:
+            return
+        try:
+            marker = next(self.channel.listen(timeout=timeout))
+            if not self.is_enabled:
+                return
+            self.log.debug("Received marker from channel: %s" % marker)
+            self.send_message(marker, connection)
+        except StopIteration:
+            return
+        except queue.Empty:
+            self.log.debug("Queue empty, continuing...")
+        except gelo.mediator.UnsubscribeException:
+            self.log.info("Queue closed, exiting...")
+            self.should_terminate = True
+            connection.quit(message="Metadata system shutdown")
 
     def send_message(self, marker: gelo.arch.Marker, c: irc.client.connection):
         """Use the provided connection to send a message (or several,
