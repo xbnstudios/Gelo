@@ -17,47 +17,50 @@ class Macro(object):
 
     def serialize(self) -> str:
         """Serialize this macro into a string, for the config file."""
-        return "\n".join(self.commands) + "\n"
+        return "\n".join(self.commands)
 
     @staticmethod
     def deserialize(serialized: str):
         """Turn a string from serialize back into a macro."""
         m = Macro()
-        m.commands = serialized.split("\n")[:-1]
+        m.commands = serialized.split("\n")
         return m
 
 
 class GeloMacroShell(cmd.Cmd):
-    intro = "Submit a blank line to end the macro."
+    intro = "Type `end` to finish the macro."
     prompt = "macro> "
 
-    def __init__(self, m: Macro, completekey='tab', stdin=None, stdout=None):
+    def __init__(self, m: Macro, pm, completekey='tab', stdin=None,
+                 stdout=None):
         """Create a new GeloMacroShell.
 
         Like a GeloShell, but doesn't execute any of the commands, only saves
         them in the Macro passed in as an argument.  It does validate them
         for correctness, to help avoid spelling errors and such.
         :param m: The macro to save commands in.
+        :param pm: The PluginManager the system is currently using.
         """
         super(GeloMacroShell, self).__init__(completekey=completekey,
                                              stdin=stdin, stdout=stdout)
         self.macro = m
+        self.plugin_manager = pm
 
     def emptyline(self):
-        """When the user enters an empty line, quit."""
-        return True
+        """When the user enters an empty line, do nothing."""
+        pass
 
     def do_squelch(self, arg):
         """Ignore the next marker from any source plugin.
 
         Usage: `squelch`"""
-        pass
+        self.macro.append("squelch")
 
     def do_stop(self, arg):
         """Ignore all markers from every source plugin until start is issued.
 
         Usage: `stop`"""
-        pass
+        self.macro.append("stop")
 
     def do_start(self, arg):
         """Pass markers from any source plugin.
@@ -65,26 +68,69 @@ class GeloMacroShell(cmd.Cmd):
         This is the default, and this command need not be issued when the
         shell opens.
 
-        Usage: `start`"""
-        pass
+        Usage: `start`
+        """
+        self.macro.append("start")
 
-    def do_load(self, arg):
-        """Load the named plugin.
-
-        An error message is printed when the plugin does not exist, and the
-        command is silently ignored if the plugin is already loaded.
-
-        Usage: `load http_poller`"""
-        pass
-
-    def do_unload(self, arg):
-        """Unload the named plugin.
+    def do_enable(self, arg):
+        """Enable the named plugin.
 
         An error message is printed when the plugin does not exist, and the
-        command is silently ignored if the plugin is already unloaded.
+        command is silently ignored if the plugin is already enabled.
 
-        Usage: `unload http_poller`"""
-        pass
+        Usage: `enable HttpPoller`"""
+        if ' ' in arg:
+            print("gelo: macro: load: invalid command format")
+            return False
+        plugin = self.plugin_manager.getPluginByName(arg)
+        if plugin is None:
+            print("gelo: macro: load: nonexistent plugin \"%s\"" % arg)
+            return False
+        self.macro.append("enable " + arg)
+
+    def do_disable(self, arg):
+        """Disable the named plugin.
+
+        An error message is printed when the plugin does not exist, and the
+        command is silently ignored if the plugin is already disabled.
+
+        Usage: `disable HttpPoller`"""
+        if ' ' in arg:
+            print("gelo: macro: unload: invalid command format")
+            return False
+        plugin = self.plugin_manager.getPluginByName(arg)
+        if plugin is None:
+            print("gelo: macro: unload: nonexistent plugin \"%s\"" % arg)
+            return False
+        self.macro.append("disable " + arg)
+
+    def do_inject(self, arg):
+        """Inject a marker into the system, as if from a source plugin.
+
+        The first word after the command must be either TRACK or TOPIC.
+        Everything after that is considered the marker text, and will be sent
+        along to the sink plugins. To save your pinkies, the marker type will be
+        automatically uppercased for you.
+
+        Usage: `inject TRACK Justice - Fire`
+        """
+        if ' ' not in arg:
+            print("gelo: inject: invalid command format")
+            return False
+        split_point = arg.find(' ')
+        marker_type = arg[:split_point].upper()
+        marker_type = arch.MarkerType.from_string(marker_type)
+        if marker_type is None:
+            print("gelo: inject: invalid marker type")
+            return False
+        self.macro.append("inject " + arg)
+
+    def do_end(self, arg):
+        """Finish adding to the macro.
+
+        Usage: `end`
+        """
+        return True
 
 
 class GeloShell(cmd.Cmd):
@@ -111,8 +157,11 @@ class GeloShell(cmd.Cmd):
         self.gelo = g
         self.mediator = m
         self.plugin_manager = pm
-        tmp = configparser.ConfigParser()
         self.macro_file = macro_file
+        self.macros = configparser.ConfigParser()
+        self.macros.read(macro_file)
+        if 'macros' not in self.macros.keys():
+            self.macros['macros'] = {}
         self.log = logging.getLogger(__name__)
 
     def emptyline(self):
@@ -192,10 +241,36 @@ class GeloShell(cmd.Cmd):
         To run a macro, type its name at the command prompt.
 
         Usage: `define a_macro`"""
+        if ' ' in arg:
+            print('gelo: define: spaces not permitted in macro name')
+            return False
         m = Macro()
-        s = GeloMacroShell(m)
+        s = GeloMacroShell(m, self.plugin_manager)
         s.cmdloop()
-        # Save the macro, somehow
+        self.macros['macros'][arg] = m.serialize()
+
+    def do_undefine(self, arg):
+        """Undefine the named macro.
+
+        Remove the saved definition for the named macro. Undefining a macro
+        that is not defined will result in an error message.
+
+        Usage: `undefine a_macro`
+        """
+        if ' ' in arg:
+            print('gelo: undefine: spaces not permitted in macro name')
+            return False
+        del(self.macros['macros'][arg])
+
+    def do_list(self, arg):
+        """List all of the macros currently defined.
+
+        Usage: `list`
+        """
+        if len(self.macros['macros'].keys()) == 0:
+            print("gelo: list: no macros defined")
+        for key in self.macros['macros'].keys():
+            print(key)
 
     def do_inject(self, arg):
         """Inject a marker into the system, as if from a source plugin.
@@ -223,22 +298,19 @@ class GeloShell(cmd.Cmd):
         # inject marker
         self.mediator.publish(marker_type, m)
 
-    def do_undefine(self, arg):
-        """Undefine the named macro.
-
-        Remove the saved definition for the named macro. Undefining a macro
-        that is not defined will result in an error message.
-
-        Usage: `undefine a_macro`"""
-        pass
-
     def default(self, line):
         """Try running a macro, or display an error message."""
-        print("gelo: unrecognized command")
+        line = line.strip()
+        if line in self.macros['macros'].keys():
+            self.cmdqueue.extend(self.macros['macros'][line].split("\n"))
+        else:
+            print("gelo: unrecognized command")
 
     def do_quit(self, arg):
-        """Terminate all plugins and exit Gelo.
+        """Terminate all plugins, save macro changes, and exit Gelo.
 
         Usage: `quit`"""
         self.gelo.shutdown()
+        with open(self.macro_file, 'w') as fp:
+            self.macros.write(fp)
         return True
