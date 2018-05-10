@@ -16,7 +16,8 @@ class IRC(gelo.arch.IMarkerSink):
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         super().__init__(config, mediator, show)
         self.log = logging.getLogger("gelo.plugins.irc")
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               IRC.__name__)
         self.validate_config()
         self.log.debug("Configuration validated")
         self.nick = self.config['nick']

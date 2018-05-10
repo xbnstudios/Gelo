@@ -170,8 +170,8 @@ class GeloShell(cmd.Cmd):
             return False
         if not plugin.is_activated:
             return False
-        # This isn't enough. You also need to terminate the queue. How?
         self.plugin_manager.deactivatePluginByName(arg)
+        self.mediator.close_subscriber(arg)
 
     def do_define(self, arg):
         """Define a macro, with the given name.

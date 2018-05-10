@@ -18,7 +18,8 @@ class Tweeter(gelo.arch.IMarkerSink):
         self.log = logging.getLogger("gelo.plugins.tweeter")
         self.validate_config()
         self.log.debug("Configuration valid")
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               Tweeter.__name__)
         self.api = self.get_api()
 
     def run(self):

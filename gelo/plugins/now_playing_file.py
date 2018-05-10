@@ -12,7 +12,8 @@ class NowPlayingFile(gelo.arch.IMarkerSink):
         """Create a new NowPlayingFile marker sink."""
         super().__init__(config, mediator, show)
         self.validate_config()
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               NowPlayingFile.__name__)
 
     def run(self):
         """Run the marker-receiving code."""

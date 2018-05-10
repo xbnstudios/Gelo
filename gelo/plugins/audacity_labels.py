@@ -16,7 +16,8 @@ class AudacityLabels(gelo.arch.IMarkerSink):
         super().__init__(config, mediator, show)
         self.validate_config()
         self.clear_file()
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               AudacityLabels.__name__)
         self.last_marker = None
 
     def run(self):

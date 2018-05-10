@@ -71,7 +71,7 @@ class Mediator(gelo.arch.IMediator):
             raise ValueError()
         if not subscriber:
             raise ValueError()
-        self.log.info("New subscriber to %s: %s" % marker_types, subscriber)
+        self.log.info("New subscriber to %s: %s" % (marker_types, subscriber))
         q = queue.Queue()
         q.listen = partial(self.listen, q)
         for marker_type in marker_types:
