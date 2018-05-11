@@ -13,7 +13,7 @@ class AudacityLabels(arch.IMarkerSink):
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""
         super().__init__(config, mediator, show)
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger("gelo.plugins.AudacityLabels")
         self.validate_config()
         self.log.debug("Configuration validated")
         self.collision_count = 0
@@ -103,7 +103,6 @@ class AudacityLabels(arch.IMarkerSink):
                           ' key "path"')
         else:
             self.config['path'] = os.path.expandvars(self.config['path'])
-            self.config['path'] = self.config['path'].format(show=self.show)
         # Return errors, if any
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)
