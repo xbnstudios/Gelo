@@ -15,7 +15,7 @@ class Tweeter(gelo.arch.IMarkerSink):
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new Tweeter."""
         super().__init__(config, mediator, show)
-        self.log = logging.getLogger("gelo.plugins.tweeter")
+        self.log = logging.getLogger("gelo.plugins.Tweeter")
         self.validate_config()
         self.log.debug("Configuration valid")
         self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
