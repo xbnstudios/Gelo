@@ -11,7 +11,7 @@ user_plugin_dir=$HOME/.config/gelo/plugins
 # string value.
 log_file=$HOME/.config/gelo/gelo.log
 # macro_file
-#
+# The file in which macros should be saved
 macro_file=$HOME/.config/gelo/macros.ini
 
 #
@@ -132,3 +132,26 @@ message=Now Playing{special}: {marker}
 # zero-padded number to avoid overwriting existing files with the same name.
 # Audacity expects this file to end with ".txt".
 path=$HOME/Desktop/{show}-{count}.txt
+
+#
+# plugin:http_pusher: Configure the HTTP Pusher plugin
+#
+[plugin:http_pusher]
+# url
+# The URL to connect to, with no arguments. HTTPS is supported.
+url = https://example.com/now_playing
+# method
+# The HTTP method that the endpoint expects you to use. Currently only GET and
+# POST are supported, and you should *really* be using POST.
+method = POST
+# api_key_param
+# The argument name where the endpoint expects to find an API key, because it's
+# not just exposed to the public, right? If your system is bad, comment this key
+# out to disable sending an API key.
+api_key_param = api_key
+# api_key
+# The API key to send, for authentication purposes.
+api_key = nonsense
+# marker_param
+# The argument name where the endpoint expects to find the marker text.
+marker_param = song

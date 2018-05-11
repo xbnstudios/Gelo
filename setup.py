@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='gelo',
-    version='2.0.0',
+    version='2.1.0',
     description='podcast chapter metadata gathering tool for content creators',
     url='https://github.com/s0ph0s-2/Gelo',
     author='s0ph0s-2',
