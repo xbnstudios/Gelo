@@ -23,6 +23,7 @@ class Configuration(object):
         self.macro_file = os.path.expandvars(config_file['core']['macro_file'])
         self.configparser = config_file
         self.show = args.show
+        self.broadcast_delay = float(config_file.get('core', 'broadcast_delay'))
         self.log_level = args.log_level
 
     @staticmethod
@@ -37,6 +38,16 @@ class Configuration(object):
             errors.append('[core] is missing the required key "log_file"')
         if 'macro_file' not in config_file['core'].keys():
             errors.append('[core] is missing the required key "macro_file"')
+        if 'broadcast_delay' not in config_file['core'].keys():
+            errors.append('[core] is missing the required key '
+                          '"broadcast_delay"')
+        else:
+            if not is_float(config_file['core']['broadcast_delay']):
+                errors.append('[core] has a non-float value for the key '
+                              '"broadcast_delay"')
+            elif float(config_file.get('core', 'broadcast_delay')) < 0:
+                errors.append('[core] has a negative value for the key '
+                              '"broadcast_delay"')
         if len(errors) > 0:
             raise InvalidConfigurationError(errors)
 
@@ -52,6 +63,19 @@ def is_int(value: str) -> bool:
     False otherwise."""
     try:
         int(value)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def is_float(value: str) -> bool:
+    """Check to see if the value passed is a float.
+
+    :return: True if the value can be converted to a float,
+    False otherwise."""
+    try:
+        float(value)
     except ValueError:
         return False
     else:

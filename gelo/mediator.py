@@ -2,7 +2,7 @@ import gelo.arch
 import queue
 import logging
 from time import time
-from threading import Lock
+from threading import Lock, Timer
 from functools import partial
 
 
@@ -11,7 +11,7 @@ class Mediator(gelo.arch.IMediator):
 
     QUEUE_MAX = 100
 
-    def __init__(self):
+    def __init__(self, broadcast_delay: float):
         """Create a new instance of this Mediator."""
         super().__init__()
         self.channels = {}
@@ -21,6 +21,7 @@ class Mediator(gelo.arch.IMediator):
         self.first_time = None
         self.shouldSquelchNext = False
         self.stopped = False
+        self.broadcast_delay = broadcast_delay
         self.log = logging.getLogger("gelo.mediator")
 
     def publish(self, marker_type: gelo.arch.MarkerType, marker:
@@ -45,6 +46,22 @@ class Mediator(gelo.arch.IMediator):
             self.log.debug("First time is none. Setting to %s" % t)
             self.first_time = t
         marker.time = time() - self.first_time
+        delay = Timer(self.broadcast_delay,
+                      self._publish,
+                      args=[marker_type, marker])
+        delay.start()
+        self.log.info("Broadcast delay started.")
+
+    def _publish(self, marker_type: gelo.arch.MarkerType, marker:
+                 gelo.arch.Marker) -> None:
+        """Actually do the publishing part.
+        
+        This is designed to be called by a threading.Timer, so that the 
+        actual marker output occurs somewhat in-line with the actual broadcast.
+        
+        :param marker_type: The EventType corresponding to this marker.
+        :param marker: The Marker to publish.
+        """
         if marker_type not in self.channels:
             self.channel_lock.acquire()
             if marker_type not in self.channels:

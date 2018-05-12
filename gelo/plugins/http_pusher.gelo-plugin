@@ -1,5 +1,5 @@
 [Core]
-Name = HTTP Pusher
+Name = HttpPusher
 Module = http_pusher
 
 [Documentation]

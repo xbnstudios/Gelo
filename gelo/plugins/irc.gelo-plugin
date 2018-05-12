@@ -1,5 +1,5 @@
 [Core]
-Name = IRC
+Name = Irc
 Module = irc
 
 [Documentation]

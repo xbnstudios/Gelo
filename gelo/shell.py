@@ -263,14 +263,25 @@ class GeloShell(cmd.Cmd):
         del(self.macros['macros'][arg])
 
     def do_list(self, arg):
-        """List all of the macros currently defined.
+        """List all of the macros and plugins currently known.
 
-        Usage: `list`
+        Optionally, specify one of "macros" or "plugins" to list just those.
+
+        Usage: `list macros`
         """
-        if len(self.macros['macros'].keys()) == 0:
-            print("gelo: list: no macros defined")
-        for key in self.macros['macros'].keys():
-            print(key)
+        if arg not in ['macros', 'plugins', '']:
+            print("gelo: list: invalid argument")
+            return False
+        if arg == "macros" or arg == "":
+            print("Macros:")
+            if len(self.macros['macros'].keys()) == 0:
+                print("\t(no macros defined)")
+            for key in self.macros['macros'].keys():
+                print("\t" + key)
+        if arg == "plugins" or arg == "":
+            print("Plugins:")
+            for plugin in self.plugin_manager.getAllPlugins():
+                print("\t" + plugin.name)
 
     def do_inject(self, arg):
         """Inject a marker into the system, as if from a source plugin.
