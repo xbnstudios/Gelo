@@ -19,8 +19,10 @@ class AudacityLabels(arch.IMarkerSink):
         self.collision_count = 0
         self.filename = self.avoid_overwrite_filename()
         self.log.info("Using %s as the data file path" % self.filename)
+        self.delayed = conf.as_bool(self.config['delayed'])
         self.channel = self.mediator.subscribe([arch.MarkerType.TRACK],
-                                               AudacityLabels.__name__)
+                                               AudacityLabels.__name__,
+                                               delayed=self.delayed)
         self.last_marker = None
 
     def run(self):
@@ -103,6 +105,12 @@ class AudacityLabels(arch.IMarkerSink):
                           ' key "path"')
         else:
             self.config['path'] = os.path.expandvars(self.config['path'])
+        if 'delayed' not in self.config.keys():
+            self.config['delayed'] = 'False'
+        else:
+            if not conf.is_bool(self.config['delayed']):
+                errors.append('[plugin:audacity_labels] has a non-boolean '
+                              'value for the key "delayed"')
         # Return errors, if any
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)

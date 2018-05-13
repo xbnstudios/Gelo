@@ -22,8 +22,10 @@ class HttpPusher(gelo.arch.IMarkerSink):
         self.api_key = self.config['api_key']
         self.api_key_param = self.config['api_key_param']
         self.marker_param = self.config['marker_param']
+        self.delayed = gelo.conf.as_bool(self.config['delayed'])
         self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
-                                               HttpPusher.__name__)
+                                               HttpPusher.__name__,
+                                               delayed=self.delayed)
         self.session = requests.Session()
 
     def run(self):
@@ -83,5 +85,11 @@ class HttpPusher(gelo.arch.IMarkerSink):
         if 'marker_param' not in self.config.keys():
             errors.append('[plugin:http_pusher] is missing the required key'
                           ' "marker_param"')
+        if 'delayed' not in self.config.keys():
+            self.config['delayed'] = 'False'
+        else:
+            if not gelo.conf.is_bool(self.config['delayed']):
+                errors.append('[plugin:http_pusher] has a non-boolean value '
+                              'for the key "delayed"')
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)
