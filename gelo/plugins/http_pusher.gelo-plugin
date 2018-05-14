@@ -5,5 +5,5 @@ Module = http_pusher
 [Documentation]
 Description = Connect to an HTTP(S) endpoint to send marker data
 Author = s0ph0s
-Version = 1.0.0
+Version = 1.1.0
 Website = https://github.com/s0ph0s-2/Gelo
