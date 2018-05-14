@@ -72,6 +72,9 @@ prefix_file = /tmp/prefix.txt
 # sent by the marker source.  "{special}" will be substituted for " (...)",
 # where the ellipsis is any special status attached to the marker.
 announce_string=Now Playing{special}: {marker}
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default True
+;delayed = True
 
 #
 # plugin:now_playing_file: A text file that contains a single line with the
@@ -82,6 +85,9 @@ announce_string=Now Playing{special}: {marker}
 # The path to write the now playing file to.  Environment variable expansion is
 # performed on this string value.
 path=$HOME/Desktop/np.txt
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default False
+;delayed = False
 
 
 #
@@ -124,6 +130,9 @@ send_to=#test
 # account when creating this string. If repeat_with is defined, the message will
 # be repeated, each time substituting in one of the items for {item}.
 message=Now Playing{special}: {marker}
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default True
+;delayed = True
 
 #
 # plugin:audacity_labels: Configure the Audacity Labels plugin
@@ -136,6 +145,9 @@ message=Now Playing{special}: {marker}
 # zero-padded number to avoid overwriting existing files with the same name.
 # Audacity expects this file to end with ".txt".
 path=$HOME/Desktop/{show}-{count}.txt
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default False
+;delayed = False
 
 #
 # plugin:http_pusher: Configure the HTTP Pusher plugin
@@ -159,3 +171,6 @@ api_key = nonsense
 # marker_param
 # The argument name where the endpoint expects to find the marker text.
 marker_param = song
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default False
+;delayed = False
