@@ -32,7 +32,7 @@ class HttpPoller(arch.IMarkerSource):
                 track = self.poll_server()
             except requests.exceptions.ConnectionError:
                 continue
-            if track == self.last_marker:
+            if track == self.last_marker or track.strip() == "":
                 continue
             m = arch.Marker(track)
             m.special = self.check_prefix_file()

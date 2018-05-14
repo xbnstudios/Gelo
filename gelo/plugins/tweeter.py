@@ -49,10 +49,16 @@ class Tweeter(gelo.arch.IMarkerSink):
                                                       special=special)
             )
         except twitter.error.TwitterError as e:
-            if e.message['code'] == 187:
-                self.log.warning("Twitter rejected duplicate status. Ignoring.")
+            if type(e.message) is list:
+                if e.message[0]['code'] == 187:
+                    self.log.warning("Twitter rejected duplicate status. "
+                                     "Ignoring.")
             else:
-                raise e
+                if e.message['code'] == 187:
+                    self.log.warning("Twitter rejected duplicate status. "
+                                     "Ignoring.")
+                else:
+                    raise e
 
     def get_api(self):
         """Get a Twitter API object from the python-twitter module."""
