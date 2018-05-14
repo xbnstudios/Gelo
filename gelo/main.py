@@ -101,7 +101,7 @@ class Gelo(object):
         self.l.info("Plugin locations: %s" % (
             [BUILTIN_PLUGIN_DIR, configuration.user_plugin_dir]))
         self.gpm = GeloPluginManager(plugin_locator=pfl)
-        self.m = mediator.Mediator()
+        self.m = mediator.Mediator(configuration.broadcast_delay)
         self.gpm.set_cms(configuration, self.m, configuration.show)
         self.l.info("Collecting plugins...")
         self.gpm.collectPlugins()

@@ -13,6 +13,10 @@ log_file=$HOME/.config/gelo/gelo.log
 # macro_file
 # The file in which macros should be saved
 macro_file=$HOME/.config/gelo/macros.ini
+# broadcast_delay
+# How long the system should wait before pushing markers from a source to all of
+# the sinks.
+broadcast_delay = 8.0
 
 #
 # plugin:http_poller: Configure the HTTP poller metadata source

@@ -16,8 +16,6 @@ class IRC(gelo.arch.IMarkerSink):
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         super().__init__(config, mediator, show)
         self.log = logging.getLogger("gelo.plugins.irc")
-        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
-                                               IRC.__name__)
         self.validate_config()
         self.log.debug("Configuration validated")
         self.nick = self.config['nick']
@@ -36,6 +34,10 @@ class IRC(gelo.arch.IMarkerSink):
         self.repeat_with = self.config['repeat_with'].split(",") if \
             'repeat_with' in self.config.keys() else None
         self.message = self.config['message']
+        self.delayed = gelo.conf.as_bool(self.config['delayed'])
+        self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
+                                               IRC.__name__,
+                                               delayed=self.delayed)
         self.ready = False
 
     def on_connect(self, connection, event):
@@ -167,5 +169,11 @@ class IRC(gelo.arch.IMarkerSink):
             errors.append('[plugin:irc] is missing the required key "send_to"')
         if 'message' not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "message"')
+        if 'delayed' not in self.config.keys():
+            self.config['delayed'] = 'True'
+        else:
+            if not gelo.conf.is_bool(self.config['delayed']):
+                errors.append('[plugin:irc] has a non-boolean value for the '
+                              'key "delayed"')
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)

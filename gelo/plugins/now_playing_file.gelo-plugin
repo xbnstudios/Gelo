@@ -1,5 +1,5 @@
 [Core]
-Name = Now Playing File
+Name = NowPlayingFile
 Module = now_playing_file
    
 [Documentation]

@@ -18,8 +18,10 @@ class Tweeter(gelo.arch.IMarkerSink):
         self.log = logging.getLogger("gelo.plugins.Tweeter")
         self.validate_config()
         self.log.debug("Configuration valid")
+        self.delayed = gelo.conf.as_bool(self.config['delayed'])
         self.channel = self.mediator.subscribe([gelo.arch.MarkerType.TRACK],
-                                               Tweeter.__name__)
+                                               Tweeter.__name__,
+                                               delayed=self.delayed)
         self.api = self.get_api()
 
     def run(self):
@@ -85,6 +87,12 @@ class Tweeter(gelo.arch.IMarkerSink):
         if 'announce_string' not in self.config.keys():
             errors.append('[plugin:tweeter] is missing the required key'
                           ' "announce_string"')
+        if 'delayed' not in self.config.keys():
+            self.config['delayed'] = 'True'
+        else:
+            if not gelo.conf.is_bool(self.config['delayed']):
+                errors.append('[plugin:tweeter] has a non-boolean value for '
+                              'the key "delayed"')
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)
 

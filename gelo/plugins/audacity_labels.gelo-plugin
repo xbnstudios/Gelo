@@ -1,5 +1,5 @@
 [Core]
-Name = Audacity Labels
+Name = AudacityLabels
 Module = audacity_labels
    
 [Documentation]
