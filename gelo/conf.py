@@ -24,7 +24,7 @@ class Configuration(object):
         self.configparser = config_file
         self.show = args.show
         self.broadcast_delay = float(config_file.get('core', 'broadcast_delay'))
-        self.log_level = args.log_level
+        self.log_level = self.get_log_level(args.verbose)
 
     @staticmethod
     def validate_config_file(config_file: configparser.ConfigParser):
@@ -50,6 +50,23 @@ class Configuration(object):
                               '"broadcast_delay"')
         if len(errors) > 0:
             raise InvalidConfigurationError(errors)
+
+    @staticmethod
+    def get_log_level(verbose_count: int) -> str:
+        """Convert a number of -v args into the log level.
+
+        :param verbose_count: The number of -v tags supplied as an
+        argument to the program
+        :returns: 'CRITICAL' if ``verbose_count`` is 0,
+                  'INFO' if ``verbose_count`` is 1, and
+                  'DEBUG' if ``verbose_count`` is 2.
+        """
+        if verbose_count == 1:
+            return "INFO"
+        elif verbose_count == 2:
+            return "DEBUG"
+        else:
+            return "CRITICAL"
 
 
 class InvalidConfigurationError(Exception):

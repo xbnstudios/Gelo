@@ -26,13 +26,12 @@ def main():
                         default='',
                         help='path to user plugins directory, overrides config'
                         ' file')
-    parser.add_argument('-l',
-                        '--log-level',
-                        choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO',
-                                 'DEBUG'],
-                        default='CRITICAL',
-                        help='the level of logging, one of: CRITICAL, '
-                             'ERROR, WARNING, INFO, or DEBUG')
+    parser.add_argument('-v',
+                        '--verbose',
+                        action="count",
+                        default=0,
+                        help='increase log level. One copy is INFO, two is '
+                             'DEBUG.')
     args = parser.parse_args()
     # Parse the configuration file
     config_file = configparser.ConfigParser()
