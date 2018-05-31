@@ -189,6 +189,10 @@ class GeloShell(cmd.Cmd):
         Usage: `start`"""
         self.mediator.stopped = False
 
+    def complete_plugin(self, text):
+        return [plugin.name for plugin in self.plugin_manager.getAllPlugins()
+                if plugin.name.startswith(text)]
+
     def do_enable(self, arg):
         """Enable the named plugin.
 
@@ -208,6 +212,9 @@ class GeloShell(cmd.Cmd):
         self.plugin_manager.enablePluginByName(arg)
         self.log.info("Plugin enabled: %s" % arg)
 
+    def complete_enable(self, text, *ignored):
+        return self.complete_plugin(text)
+
     def do_disable(self, arg):
         """Disable the named plugin.
 
@@ -226,6 +233,9 @@ class GeloShell(cmd.Cmd):
             return False
         self.plugin_manager.disablePluginByName(arg)
         self.log.info("Plugin disabled: %s" % arg)
+
+    def complete_disable(self, text, *ignored):
+        return self.complete_plugin(text)
 
     def do_define(self, arg):
         """Define a macro, with the given name.
@@ -262,6 +272,10 @@ class GeloShell(cmd.Cmd):
             return False
         del(self.macros['macros'][arg])
 
+    def complete_undefine(self, text, *ignored):
+        return [macro for macro in self.macros['macros'].keys() if
+                macro.startswith(text)]
+
     def do_list(self, arg):
         """List all of the macros and plugins currently known.
 
@@ -282,6 +296,10 @@ class GeloShell(cmd.Cmd):
             print("Plugins:")
             for plugin in self.plugin_manager.getAllPlugins():
                 print("\t" + plugin.name)
+
+    def complete_list(self, text, *ignored):
+        opts = ['macros', 'plugins']
+        return [opt for opt in opts if opt.startswith(text)]
 
     def do_inject(self, arg):
         """Inject a marker into the system, as if from a source plugin.
@@ -309,6 +327,10 @@ class GeloShell(cmd.Cmd):
         # inject marker
         self.mediator.publish(marker_type, m)
 
+    def complete_inject(self, text, *ignored):
+        names = dir(arch.MarkerType)
+        return [name for name in names if name.startswith(text)]
+
     def default(self, line):
         """Try running a macro, or display an error message."""
         line = line.strip()
@@ -325,3 +347,13 @@ class GeloShell(cmd.Cmd):
         with open(self.macro_file, 'w') as fp:
             self.macros.write(fp)
         return True
+
+    def completenames(self, text, *ignored):
+        func_name = 'do_' + text
+        commands = [a[3:] for a in self.get_names() if a.startswith(func_name)]
+        macros = [a for a in self.macros['macros'].keys() if a.startswith(text)]
+        return commands + macros
+
+    def completedefault(self, text, line, begidx, endidx):
+        return [macro for macro in self.macros['macros'].keys() if
+                macro.startsiwth(text)]
