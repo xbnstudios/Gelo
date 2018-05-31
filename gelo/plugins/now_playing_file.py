@@ -25,7 +25,10 @@ class NowPlayingFile(arch.IMarkerSink):
                 if not self.is_enabled:
                     continue
                 with open(self.config['path'], "w") as f:
-                    f.write(marker.label)
+                    # B.U.T.T. doesn't Do the Right Thing™ when encountering
+                    # Unicode characters.
+                    text = marker.label.replace('—', '-')
+                    f.write(text)
             except queue.Empty:
                 continue
             except mediator.UnsubscribeException:
