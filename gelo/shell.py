@@ -80,11 +80,11 @@ class GeloMacroShell(cmd.Cmd):
 
         Usage: `enable HttpPoller`"""
         if ' ' in arg:
-            print("gelo: macro: load: invalid command format")
+            print("gelo: macro: enable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: macro: load: nonexistent plugin \"%s\"" % arg)
+            print("gelo: macro: enable: nonexistent plugin \"%s\"" % arg)
             return False
         self.macro.append("enable " + arg)
 
@@ -96,11 +96,11 @@ class GeloMacroShell(cmd.Cmd):
 
         Usage: `disable HttpPoller`"""
         if ' ' in arg:
-            print("gelo: macro: unload: invalid command format")
+            print("gelo: macro: disable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: macro: unload: nonexistent plugin \"%s\"" % arg)
+            print("gelo: macro: disable: nonexistent plugin \"%s\"" % arg)
             return False
         self.macro.append("disable " + arg)
 
@@ -197,11 +197,11 @@ class GeloShell(cmd.Cmd):
 
         Usage: `enable HttpPoller`"""
         if ' ' in arg:
-            print("gelo: load: invalid command format")
+            print("gelo: enable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: load: nonexistent plugin \"%s\"" % arg)
+            print("gelo: enable: nonexistent plugin \"%s\"" % arg)
             return False
         if plugin.plugin_object.is_enabled:
             return False
@@ -216,11 +216,11 @@ class GeloShell(cmd.Cmd):
 
         Usage: `disable HttpPoller`"""
         if ' ' in arg:
-            print("gelo: unload: invalid command format")
+            print("gelo: disable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: unload: nonexistent plugin \"%s\"" % arg)
+            print("gelo: disable: nonexistent plugin \"%s\"" % arg)
             return False
         if not plugin.plugin_object.is_enabled:
             return False
