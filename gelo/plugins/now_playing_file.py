@@ -28,7 +28,7 @@ class NowPlayingFile(arch.IMarkerSink):
                     # B.U.T.T. doesn't Do the Right Thing™ when encountering
                     # Unicode characters.
                     text = marker.label.replace('—', '-')
-                    f.write(text)
+                    f.write(text.encode('latin-1', 'ignore'))
             except queue.Empty:
                 continue
             except mediator.UnsubscribeException:

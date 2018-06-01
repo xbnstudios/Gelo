@@ -5,6 +5,5 @@ Module = now_playing_file
 [Documentation]
 Description = Write a single-line text file with the marker name, for BUTT.
 Author = s0ph0s
-Version = 2.1.1
+Version = 2.1.2
 Website = https://github.com/s0ph0s-2/Gelo
-
