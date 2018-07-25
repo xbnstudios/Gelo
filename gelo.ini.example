@@ -174,3 +174,21 @@ marker_param = song
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
 ;delayed = False
+
+#
+# plugin:somafm: Configure the SomaFM plugin
+#
+[plugin:somafm]
+# stream_url
+# The URL of the SomaFM stream to connect to.  Must be a direct link, not a
+# playlist link.  Also, only HTTP MP3 streams are supported, because they're
+# really easy to decode metadata from.
+stream_url = http://ice1.somafm.com/groovesalad-128-mp3
+# source_name
+# The bit in parentheses when this track is announced.
+source_name = from Groove Salad on Soma.FM
+# extra_delay
+# A floating-point number of seconds to delay announcements for.  Useful for
+# compensating for streaming delays from Soma.FM to you.
+extra_delay = 1
+
