@@ -191,6 +191,10 @@ source_name = from Groove Salad on Soma.FM
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from Soma.FM to you.
 extra_delay = 1
+# start_disabled
+# Prevent this plugin from immediately announcing its markers when the program
+# starts.
+start_disabled = True
 
 #
 # plugin:181fm: Configure the 181.FM plugin
@@ -208,3 +212,7 @@ source_name = from The Eagle at 181.FM
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from 181.FM to you.
 extra_delay = 1
+# start_disabled
+# Prevent this plugin from immediately announcing its markers when the program
+# starts.
+start_disabled = True

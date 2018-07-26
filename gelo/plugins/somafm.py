@@ -1,5 +1,5 @@
 import re
-import sys
+import logging
 import urllib.parse
 from typing import Optional
 from threading import Timer
@@ -23,10 +23,12 @@ class SomaFm(arch.IMarkerSource):
         self.http_client = None
         self.http_resp = None
         self.metadata_interval = 0
+        self.log = logging.getLogger("gelo.plugins.somafm")
         self.config_test()
         self.url = self.config['stream_url']
         self.source_name = self.config['source_name']
         self.extra_delay = float(self.config['extra_delay'])
+        self.is_enabled = not conf.as_bool(self.config['start_disabled'])
 
     def run(self):
         """Run the code that receives and posts markers.
@@ -41,33 +43,42 @@ class SomaFm(arch.IMarkerSource):
             if not self.is_enabled:
                 continue
             if track is not None:
+                self.log.debug("track was not None; processing")
                 m = arch.Marker(track)
                 m.special = self.source_name
                 delay = Timer(self.extra_delay,
                               self.mediator.publish,
                               args=[arch.MarkerType.TRACK, m])
                 delay.start()
+                self.log.debug("started delayed track publish timer")
         self.teardown_connection()
 
     def setup_connection(self):
         """Connect to the configured stream."""
+        self.log.debug("connecting to " + self.url)
         parsed_url = urllib.parse.urlparse(self.url)
         if parsed_url.scheme == "http":
+            self.log.debug("using plaintext HTTP connection")
             self.http_client = http.client.HTTPConnection(parsed_url.netloc)
         elif parsed_url.scheme == "https":
+            self.log.debug("using encrypted HTTPS connection")
             self.http_client = http.client.HTTPSConnection(parsed_url.netloc)
         else:
-            print("could not identify url scheme")
-            sys.exit(1)
+            self.log.warning("unsupported stream protocol; terminating")
+            self.should_terminate = True
         self.http_client.request("GET", parsed_url.path, headers=self.HEADERS)
         self.http_resp = self.http_client.getresponse()
         if self.http_resp is None:
-            print("request failed")
-            sys.exit(1)
+            self.log.warning("HTTP response was None. Is the stream "
+                             "configured properly?")
+            self.should_terminate = True
         self.metadata_interval = int(self.http_resp.getheader("Icy-MetaInt"))
+        self.log.debug("metadata interval: " + str(self.metadata_interval) +
+                       " bytes")
 
     def teardown_connection(self):
         """Disconnect from the configured stream."""
+        self.log.debug("tearing down connection")
         self.http_client.close()
 
     def next_track(self) -> Optional[str]:
@@ -79,17 +90,24 @@ class SomaFm(arch.IMarkerSource):
         ignored = self.http_resp.read(self.metadata_interval)
         size_byte = ord(self.http_resp.read(1))
         metadata_size = size_byte * 16
+        self.log.debug("reading " + str(metadata_size) + " bytes of metadata")
         metadata = str(self.http_resp.read(metadata_size), 'utf-8')
+        self.log.debug("stringified metadata: " + metadata)
         if metadata == "":
+            self.log.debug("metadata was empty; return None")
             return None
-        track_matcher = re.search("StreamTitle='([^']*)';", metadata)
+        track_matcher = re.search("StreamTitle='(.*?)';(\S|$)", metadata)
         if track_matcher is None:
+            self.log.debug("metadata didn't contain StreamTitle; return None")
             return None
         track = track_matcher.group(1)
         if track is None:
+            self.log.debug("match group 1 is None; return None")
             return None
         if track == self.last_track:
+            self.log.debug("track identical to previous track; return None")
             return None
+        self.log.info("New track: " + track)
         self.last_track = track
         return track
 
@@ -108,5 +126,12 @@ class SomaFm(arch.IMarkerSource):
         elif not conf.is_float(self.config['extra_delay']):
             errors.append('[plugin:somafm] does not have a float value for'
                           ' the key "extra_delay"')
+        if 'start_disabled' not in self.config:
+            errors.append('[plugin:somafm] does not have the required key '
+                          '"start_disabled"')
+        elif not conf.is_bool(self.config['start_disabled']):
+            errors.append('[plugin:somafm] does not have a boolean-parseable'
+                          'value for the key "start_disabled"')
+
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)
