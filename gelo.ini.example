@@ -192,3 +192,19 @@ source_name = from Groove Salad on Soma.FM
 # compensating for streaming delays from Soma.FM to you.
 extra_delay = 1
 
+#
+# plugin:181fm: Configure the 181.FM plugin
+#
+[plugin:one_eighty_one_fm]
+# stream_url
+# The URL of the 181.FM stream to connect to.  Must be a direct link, not a
+# playlist link.  Also, only HTTP MP3 streams are supported, because they're
+# really easy to decode metadata from.
+stream_url = http://listen.livestreamingservice.com/181-eagle_128k.mp3
+# source_name
+# The bit in parentheses when this track is announced.
+source_name = from The Eagle at 181.FM
+# extra_delay
+# A floating-point number of seconds to delay announcements for.  Useful for
+# compensating for streaming delays from 181.FM to you.
+extra_delay = 1
