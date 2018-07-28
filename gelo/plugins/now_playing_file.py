@@ -24,7 +24,7 @@ class NowPlayingFile(arch.IMarkerSink):
                 marker = next(self.channel.listen())
                 if not self.is_enabled:
                     continue
-                with open(self.config['path'], "w") as f:
+                with open(self.config['path'], "wb") as f:
                     # B.U.T.T. doesn't Do the Right Thing™ when encountering
                     # Unicode characters.
                     text = marker.label.replace('—', '-')

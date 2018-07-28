@@ -1,0 +1,9 @@
+[Core]
+Name = SomaFM
+Module = somafm
+
+[Documentation]
+Description = Announce track names from Soma.FM
+Author = s0ph0s
+Version = 1.0.0
+Website = https://github.com/s0ph0s-2/Gelo

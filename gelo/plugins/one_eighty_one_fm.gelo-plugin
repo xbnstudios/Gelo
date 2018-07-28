@@ -1,0 +1,9 @@
+[Core]
+Name = OneEightyOneFM
+Module = one_eighty_one_fm
+
+[Documentation]
+Description = Announce track names from 181.FM
+Author = s0ph0s
+Version = 1.0.0
+Website = https://github.com/s0ph0s-2/Gelo
