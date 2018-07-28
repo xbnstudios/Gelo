@@ -191,6 +191,11 @@ source_name = from Groove Salad on Soma.FM
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from Soma.FM to you.
 extra_delay = 1
+# marker_prefix
+# Prepend a string to the track before it gets sent out.  Useful for indicating
+# some additional information to listeners.  This value must be quoted with
+# double-quotes in order to prevent trailing spaces from being stripped off.
+marker_prefix = (Pre-Show)
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
@@ -212,6 +217,11 @@ source_name = from The Eagle at 181.FM
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from 181.FM to you.
 extra_delay = 1
+# marker_prefix
+# Prepend a string to the track before it gets sent out.  Useful for indicating
+# some additional information to listeners.  This value must be quoted with
+# double-quotes in order to prevent trailing spaces from being stripped off.
+marker_prefix = "(Pre-Show) "
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.

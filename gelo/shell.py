@@ -191,7 +191,7 @@ class GeloShell(cmd.Cmd):
 
     def complete_plugin(self, text):
         return [plugin.name for plugin in self.plugin_manager.getAllPlugins()
-                if plugin.name.startswith(text)]
+                if plugin.name.lower().startswith(text.lower())]
 
     def do_enable(self, arg):
         """Enable the named plugin.

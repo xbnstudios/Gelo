@@ -28,6 +28,7 @@ class SomaFm(arch.IMarkerSource):
         self.url = self.config['stream_url']
         self.source_name = self.config['source_name']
         self.extra_delay = float(self.config['extra_delay'])
+        self.marker_prefix = self.config['marker_prefix'].strip('"')
         self.is_enabled = not conf.as_bool(self.config['start_disabled'])
 
     def run(self):
@@ -44,7 +45,7 @@ class SomaFm(arch.IMarkerSource):
                 continue
             if track is not None:
                 self.log.debug("track was not None; processing")
-                m = arch.Marker(track)
+                m = arch.Marker(self.marker_prefix + track)
                 m.special = self.source_name
                 delay = Timer(self.extra_delay,
                               self.mediator.publish,
@@ -132,6 +133,9 @@ class SomaFm(arch.IMarkerSource):
         elif not conf.is_bool(self.config['start_disabled']):
             errors.append('[plugin:somafm] does not have a boolean-parseable'
                           'value for the key "start_disabled"')
+        if 'marker_prefix' not in self.config:
+            errors.append('[plugin:one_eighty_one_fm] does not have the '
+                          'required key "marker_prefix"')
 
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)
