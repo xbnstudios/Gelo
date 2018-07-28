@@ -195,7 +195,7 @@ extra_delay = 1
 # Prepend a string to the track before it gets sent out.  Useful for indicating
 # some additional information to listeners.  This value must be quoted with
 # double-quotes in order to prevent trailing spaces from being stripped off.
-marker_prefix = (Pre-Show)
+marker_prefix = "(Pre-Show) "
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
