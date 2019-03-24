@@ -10,27 +10,27 @@ from gelo import arch, conf
 class OneEightyOneFM(arch.IMarkerSource):
     """Connect to a 181.FM stream and announce their markers."""
 
-    PLUGIN_MODULE_NAME = 'one_eighty_one_fm'
+    PLUGIN_MODULE_NAME = "one_eighty_one_fm"
     HEADERS = {
         "Icy-MetaData": "1",
         "User-Agent": "gelo/3.2, one_eighty_one_fm/1.0: "
-                      "https://github.com/s0ph0s-2/gelo"
+        "https://github.com/s0ph0s-2/gelo",
     }
 
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new instance of OneEightyOneFM."""
         super().__init__(config, mediator, show)
-        self.last_track = ''
+        self.last_track = ""
         self.http_client = None
         self.http_resp = None
         self.metadata_interval = 0
         self.log = logging.getLogger("gelo.plugins.one_eighty_one_fm")
         self.config_test()
-        self.url = self.config['stream_url']
-        self.source_name = self.config['source_name']
-        self.extra_delay = float(self.config['extra_delay'])
-        self.marker_prefix = self.config['marker_prefix'].strip('"')
-        self.is_enabled = not conf.as_bool(self.config['start_disabled'])
+        self.url = self.config["stream_url"]
+        self.source_name = self.config["source_name"]
+        self.extra_delay = float(self.config["extra_delay"])
+        self.marker_prefix = self.config["marker_prefix"].strip('"')
+        self.is_enabled = not conf.as_bool(self.config["start_disabled"])
 
     def run(self):
         """Run the code that receives and posts markers.
@@ -48,9 +48,11 @@ class OneEightyOneFM(arch.IMarkerSource):
                 self.log.debug("track was not None; processing")
                 m = arch.Marker(self.marker_prefix + track)
                 m.special = self.source_name
-                delay = Timer(self.extra_delay,
-                              self.mediator.publish,
-                              args=[arch.MarkerType.TRACK, m])
+                delay = Timer(
+                    self.extra_delay,
+                    self.mediator.publish,
+                    args=[arch.MarkerType.TRACK, m],
+                )
                 delay.start()
                 self.log.debug("started delayed track publish timer")
         self.teardown_connection()
@@ -71,12 +73,12 @@ class OneEightyOneFM(arch.IMarkerSource):
         self.http_client.request("GET", parsed_url.path, headers=self.HEADERS)
         self.http_resp = self.http_client.getresponse()
         if self.http_resp is None:
-            self.log.warning("HTTP response was None. Is the stream "
-                             "configured properly?")
+            self.log.warning(
+                "HTTP response was None. Is the stream " "configured properly?"
+            )
             self.should_terminate = True
         self.metadata_interval = int(self.http_resp.getheader("Icy-MetaInt"))
-        self.log.debug("metadata interval: " + str(self.metadata_interval) +
-                       " bytes")
+        self.log.debug("metadata interval: " + str(self.metadata_interval) + " bytes")
 
     def teardown_connection(self):
         """Disconnect from the configured stream."""
@@ -93,7 +95,7 @@ class OneEightyOneFM(arch.IMarkerSource):
         size_byte = ord(self.http_resp.read(1))
         metadata_size = size_byte * 16
         self.log.debug("reading " + str(metadata_size) + " bytes of metadata")
-        metadata = str(self.http_resp.read(metadata_size), 'utf-8')
+        metadata = str(self.http_resp.read(metadata_size), "utf-8")
         self.log.debug("stringified metadata: " + metadata)
         if metadata == "":
             self.log.debug("metadata was empty; return None")
@@ -116,28 +118,42 @@ class OneEightyOneFM(arch.IMarkerSource):
     def config_test(self):
         """Verify this plugin's configuration."""
         errors = []
-        if 'stream_url' not in self.config:
-            errors.append('[plugin:one_eighty_one_fm] does not have the '
-                          'required key "stream_url"')
-        if 'source_name' not in self.config:
-            errors.append('[plugin:one_eighty_one_fm] does not have the '
-                          'required key "stream_url"')
-        if 'extra_delay' not in self.config:
-            errors.append('[plugin:one_eighty_one_fm] does not have the '
-                          'required key "extra_delay"')
-        elif not conf.is_float(self.config['extra_delay']):
-            errors.append('[plugin:one_eighty_one_fm] does not have a float '
-                          'value for the key "extra_delay"')
-        if 'start_disabled' not in self.config:
-            errors.append('[plugin:one_eighty_one_fm] does not have the '
-                          'required key "start_disabled"')
-        elif not conf.is_bool(self.config['start_disabled']):
-            errors.append('[plugin:one_eighty_one_fm] does not have a '
-                          'boolean-parseable value for the key '
-                          '"start_disabled"')
-        if 'marker_prefix' not in self.config:
-            errors.append('[plugin:one_eighty_one_fm] does not have the '
-                          'required key "marker_prefix"')
+        if "stream_url" not in self.config:
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have the "
+                'required key "stream_url"'
+            )
+        if "source_name" not in self.config:
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have the "
+                'required key "stream_url"'
+            )
+        if "extra_delay" not in self.config:
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have the "
+                'required key "extra_delay"'
+            )
+        elif not conf.is_float(self.config["extra_delay"]):
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have a float "
+                'value for the key "extra_delay"'
+            )
+        if "start_disabled" not in self.config:
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have the "
+                'required key "start_disabled"'
+            )
+        elif not conf.is_bool(self.config["start_disabled"]):
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have a "
+                "boolean-parseable value for the key "
+                '"start_disabled"'
+            )
+        if "marker_prefix" not in self.config:
+            errors.append(
+                "[plugin:one_eighty_one_fm] does not have the "
+                'required key "marker_prefix"'
+            )
 
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)

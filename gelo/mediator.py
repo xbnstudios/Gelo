@@ -26,8 +26,9 @@ class Mediator(gelo.arch.IMediator):
         self.broadcast_delay = broadcast_delay
         self.log = logging.getLogger("gelo.mediator")
 
-    def publish(self, marker_type: gelo.arch.MarkerType, marker:
-                gelo.arch.Marker) -> None:
+    def publish(
+        self, marker_type: gelo.arch.MarkerType, marker: gelo.arch.Marker
+    ) -> None:
         """Publish a new event to all applicable subscribers.
         :marker_type: The EventType corresponding to the event
         :marker: The marker to publish"""
@@ -48,9 +49,7 @@ class Mediator(gelo.arch.IMediator):
             self.log.debug("First time is none. Setting to %s" % t)
             self.first_time = t
         marker.time = time() - self.first_time
-        delay = Timer(self.broadcast_delay,
-                      self._publish,
-                      args=[marker_type, marker])
+        delay = Timer(self.broadcast_delay, self._publish, args=[marker_type, marker])
         delay.start()
         self.log.info("Broadcast delay started.")
         if marker_type not in self.instant_channels:
@@ -65,8 +64,9 @@ class Mediator(gelo.arch.IMediator):
                 continue
             q.put(marker, block=False)
 
-    def _publish(self, marker_type: gelo.arch.MarkerType, marker:
-                 gelo.arch.Marker) -> None:
+    def _publish(
+        self, marker_type: gelo.arch.MarkerType, marker: gelo.arch.Marker
+    ) -> None:
         """Publish markers to delayed subscribers.
         
         This is designed to be called by a threading.Timer, so that the 
@@ -87,9 +87,9 @@ class Mediator(gelo.arch.IMediator):
                 continue
             q.put(marker, block=False)
 
-    def subscribe(self,
-                  marker_types: gelo.arch.MarkerTypeList,
-                  subscriber: str, delayed=False) -> queue.Queue:
+    def subscribe(
+        self, marker_types: gelo.arch.MarkerTypeList, subscriber: str, delayed=False
+    ) -> queue.Queue:
         """Subscribe to all of the listed event types.
         :param marker_types: A list of MarkerType types to subscribe to.
         :param subscriber: The class name of the subscriber.
@@ -167,4 +167,5 @@ class Mediator(gelo.arch.IMediator):
 
 class UnsubscribeException(Exception):
     """Raised when a queue is closing down and listeners should unsubscribe."""
+
     pass

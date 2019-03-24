@@ -23,6 +23,7 @@ class MarkerType(Enum):
     :TRACK: a song played over the air.
     :TOPIC: a topic of conversation, be it an article or otherwise.
     """
+
     TRACK = 1
     TOPIC = 2
 
@@ -52,6 +53,7 @@ class Marker(object):
     """A marker, or a label at a time.
 
     The time is a float number of seconds since the first marker."""
+
     def __init__(self, label: str):
         """Create a new marker."""
         self.label = label
@@ -60,8 +62,12 @@ class Marker(object):
         self.special = None
 
     def __repr__(self):
-        return "Marker(%s, %s, %s, %s)" % (self.label, self.time, self.special,
-                                           self.url)
+        return "Marker(%s, %s, %s, %s)" % (
+            self.label,
+            self.time,
+            self.special,
+            self.url,
+        )
 
     @classmethod
     def withtime(cls, label: str, time: float):
@@ -91,8 +97,7 @@ class IMediator(object):
         :event_label: The actual text of the event"""
         pass
 
-    def subscribe(self, event_types: MarkerTypeList, subscriber: str,
-                  delayed=False):
+    def subscribe(self, event_types: MarkerTypeList, subscriber: str, delayed=False):
         """Subscribe to all of the listed event types.
         :param event_types: The types of events to subscribe to
         :param subscriber: The name of the plugin that's subscribing to
@@ -114,13 +119,15 @@ class IMarkerSource(Thread, IPlugin):
         super().__init__()
         if type(config) is ConfigParser:
             if self.PLUGIN_MODULE_NAME is None:
-                raise ValueError('Plugins must define PLUGIN_MODULE_NAME.')
-            self.config = config['plugin:' + self.PLUGIN_MODULE_NAME]
+                raise ValueError("Plugins must define PLUGIN_MODULE_NAME.")
+            self.config = config["plugin:" + self.PLUGIN_MODULE_NAME]
         elif type(config) is SectionProxy:
             self.config = config
         else:
-            raise ValueError('config must either be a ConfigParser object or '
-                             'a SectionProxy object.')
+            raise ValueError(
+                "config must either be a ConfigParser object or "
+                "a SectionProxy object."
+            )
         self.mediator = mediator
         self.should_terminate = False
         self.show = show
@@ -184,13 +191,15 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         super().__init__()
         if type(config) is ConfigParser:
             if self.PLUGIN_MODULE_NAME is None:
-                raise ValueError('Plugins must define PLUGIN_MODULE_NAME.')
-            self.config = config['plugin:' + self.PLUGIN_MODULE_NAME]
+                raise ValueError("Plugins must define PLUGIN_MODULE_NAME.")
+            self.config = config["plugin:" + self.PLUGIN_MODULE_NAME]
         elif type(config) is SectionProxy:
             self.config = config
         else:
-            raise ValueError('config must either be a ConfigParser object or '
-                             'a SectionProxy object.')
+            raise ValueError(
+                "config must either be a ConfigParser object or "
+                "a SectionProxy object."
+            )
         self.mediator = mediator
         self.show = show
         self.should_terminate = False
@@ -241,4 +250,3 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         it cannot be reactivated again without restarting the application.
         """
         self.should_terminate = True
-

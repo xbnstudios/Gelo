@@ -8,15 +8,15 @@ from time import time, sleep
 class HttpPoller(arch.IMarkerSource):
     """Poll an HTTP server of some description for markers."""
 
-    PLUGIN_MODULE_NAME = 'http_poller'
+    PLUGIN_MODULE_NAME = "http_poller"
 
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new instance of HttpPoller."""
         super().__init__(config, mediator, show)
-        self.last_marker = ''
+        self.last_marker = ""
         self.config_test()
-        self.poll_url = self.config['poll_url']
-        self.prefix_file = self.config['prefix_file']
+        self.poll_url = self.config["poll_url"]
+        self.prefix_file = self.config["prefix_file"]
         # Match anything inside parenthesis
         self.special_matcher = re.compile(r".*\((.*)\).*")
 
@@ -62,12 +62,14 @@ class HttpPoller(arch.IMarkerSource):
         variable expansions.
         """
         errors = []
-        if 'poll_url' not in self.config:
-            errors.append('[plugin:icecast] does not have the required key'
-                          ' "poll_url"')
-        if 'prefix_file' not in self.config:
-            errors.append('[plugin:icecast] does not have the required key'
-                          ' "prefix_file"')
+        if "poll_url" not in self.config:
+            errors.append(
+                "[plugin:icecast] does not have the required key" ' "poll_url"'
+            )
+        if "prefix_file" not in self.config:
+            errors.append(
+                "[plugin:icecast] does not have the required key" ' "prefix_file"'
+            )
         # Throw exception if necessary.
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)

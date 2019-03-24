@@ -8,6 +8,7 @@ from yapsy import PluginManager
 
 class Macro(object):
     """A set of commands."""
+
     def __init__(self):
         self.commands = []
 
@@ -31,8 +32,7 @@ class GeloMacroShell(cmd.Cmd):
     intro = "Type `end` to finish the macro."
     prompt = "macro> "
 
-    def __init__(self, m: Macro, pm, completekey='tab', stdin=None,
-                 stdout=None):
+    def __init__(self, m: Macro, pm, completekey="tab", stdin=None, stdout=None):
         """Create a new GeloMacroShell.
 
         Like a GeloShell, but doesn't execute any of the commands, only saves
@@ -41,8 +41,9 @@ class GeloMacroShell(cmd.Cmd):
         :param m: The macro to save commands in.
         :param pm: The PluginManager the system is currently using.
         """
-        super(GeloMacroShell, self).__init__(completekey=completekey,
-                                             stdin=stdin, stdout=stdout)
+        super(GeloMacroShell, self).__init__(
+            completekey=completekey, stdin=stdin, stdout=stdout
+        )
         self.macro = m
         self.plugin_manager = pm
 
@@ -79,12 +80,12 @@ class GeloMacroShell(cmd.Cmd):
         command is silently ignored if the plugin is already enabled.
 
         Usage: `enable HttpPoller`"""
-        if ' ' in arg:
+        if " " in arg:
             print("gelo: macro: enable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: macro: enable: nonexistent plugin \"%s\"" % arg)
+            print('gelo: macro: enable: nonexistent plugin "%s"' % arg)
             return False
         self.macro.append("enable " + arg)
 
@@ -95,12 +96,12 @@ class GeloMacroShell(cmd.Cmd):
         command is silently ignored if the plugin is already disabled.
 
         Usage: `disable HttpPoller`"""
-        if ' ' in arg:
+        if " " in arg:
             print("gelo: macro: disable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: macro: disable: nonexistent plugin \"%s\"" % arg)
+            print('gelo: macro: disable: nonexistent plugin "%s"' % arg)
             return False
         self.macro.append("disable " + arg)
 
@@ -114,10 +115,10 @@ class GeloMacroShell(cmd.Cmd):
 
         Usage: `inject TRACK Justice - Fire`
         """
-        if ' ' not in arg:
+        if " " not in arg:
             print("gelo: inject: invalid command format")
             return False
-        split_point = arg.find(' ')
+        split_point = arg.find(" ")
         marker_type = arg[:split_point].upper()
         marker_type = arch.MarkerType.from_string(marker_type)
         if marker_type is None:
@@ -134,12 +135,19 @@ class GeloMacroShell(cmd.Cmd):
 
 
 class GeloShell(cmd.Cmd):
-    intro = "This is the Gelo control shell.  Type 'help' or '?' to list " \
-            "commands.\n"
+    intro = "This is the Gelo control shell.  Type 'help' or '?' to list commands.\n"
     prompt = "> "
 
-    def __init__(self, g, pm, m: mediator.Mediator,
-                 macro_file, completekey='tab', stdin=None, stdout=None):
+    def __init__(
+        self,
+        g,
+        pm,
+        m: mediator.Mediator,
+        macro_file,
+        completekey="tab",
+        stdin=None,
+        stdout=None,
+    ):
         """Create a new GeloShell.
 
         This method first calls the parent constructor, then saves the
@@ -152,16 +160,17 @@ class GeloShell(cmd.Cmd):
         because Python weirdness?
         :param macro_file: The path to the file in which macros are saved.
         """
-        super(GeloShell, self).__init__(completekey=completekey, stdin=stdin,
-                                        stdout=stdout)
+        super(GeloShell, self).__init__(
+            completekey=completekey, stdin=stdin, stdout=stdout
+        )
         self.gelo = g
         self.mediator = m
         self.plugin_manager = pm
         self.macro_file = macro_file
         self.macros = configparser.ConfigParser()
         self.macros.read(macro_file)
-        if 'macros' not in self.macros.keys():
-            self.macros['macros'] = {}
+        if "macros" not in self.macros.keys():
+            self.macros["macros"] = {}
         self.log = logging.getLogger(__name__)
 
     def emptyline(self):
@@ -190,8 +199,11 @@ class GeloShell(cmd.Cmd):
         self.mediator.stopped = False
 
     def complete_plugin(self, text):
-        return [plugin.name for plugin in self.plugin_manager.getAllPlugins()
-                if plugin.name.lower().startswith(text.lower())]
+        return [
+            plugin.name
+            for plugin in self.plugin_manager.getAllPlugins()
+            if plugin.name.lower().startswith(text.lower())
+        ]
 
     def do_enable(self, arg):
         """Enable the named plugin.
@@ -200,12 +212,12 @@ class GeloShell(cmd.Cmd):
         command is silently ignored if the plugin is already enabled.
 
         Usage: `enable HttpPoller`"""
-        if ' ' in arg:
+        if " " in arg:
             print("gelo: enable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: enable: nonexistent plugin \"%s\"" % arg)
+            print('gelo: enable: nonexistent plugin "%s"' % arg)
             return False
         if plugin.plugin_object.is_enabled:
             return False
@@ -222,12 +234,12 @@ class GeloShell(cmd.Cmd):
         command is silently ignored if the plugin is already disabled.
 
         Usage: `disable HttpPoller`"""
-        if ' ' in arg:
+        if " " in arg:
             print("gelo: disable: invalid command format")
             return False
         plugin = self.plugin_manager.getPluginByName(arg)
         if plugin is None:
-            print("gelo: disable: nonexistent plugin \"%s\"" % arg)
+            print('gelo: disable: nonexistent plugin "%s"' % arg)
             return False
         if not plugin.plugin_object.is_enabled:
             return False
@@ -251,13 +263,13 @@ class GeloShell(cmd.Cmd):
         To run a macro, type its name at the command prompt.
 
         Usage: `define a_macro`"""
-        if ' ' in arg:
-            print('gelo: define: spaces not permitted in macro name')
+        if " " in arg:
+            print("gelo: define: spaces not permitted in macro name")
             return False
         m = Macro()
         s = GeloMacroShell(m, self.plugin_manager)
         s.cmdloop()
-        self.macros['macros'][arg] = m.serialize()
+        self.macros["macros"][arg] = m.serialize()
 
     def do_undefine(self, arg):
         """Undefine the named macro.
@@ -267,14 +279,15 @@ class GeloShell(cmd.Cmd):
 
         Usage: `undefine a_macro`
         """
-        if ' ' in arg:
-            print('gelo: undefine: spaces not permitted in macro name')
+        if " " in arg:
+            print("gelo: undefine: spaces not permitted in macro name")
             return False
-        del(self.macros['macros'][arg])
+        del (self.macros["macros"][arg])
 
     def complete_undefine(self, text, *ignored):
-        return [macro for macro in self.macros['macros'].keys() if
-                macro.startswith(text)]
+        return [
+            macro for macro in self.macros["macros"].keys() if macro.startswith(text)
+        ]
 
     def do_list(self, arg):
         """List all of the macros and plugins currently known.
@@ -283,14 +296,14 @@ class GeloShell(cmd.Cmd):
 
         Usage: `list macros`
         """
-        if arg not in ['macros', 'plugins', '']:
+        if arg not in ["macros", "plugins", ""]:
             print("gelo: list: invalid argument")
             return False
         if arg == "macros" or arg == "":
             print("Macros:")
-            if len(self.macros['macros'].keys()) == 0:
+            if len(self.macros["macros"].keys()) == 0:
                 print("\t(no macros defined)")
-            for key in self.macros['macros'].keys():
+            for key in self.macros["macros"].keys():
                 print("\t" + key)
         if arg == "plugins" or arg == "":
             print("Plugins:")
@@ -298,7 +311,7 @@ class GeloShell(cmd.Cmd):
                 print("\t" + plugin.name)
 
     def complete_list(self, text, *ignored):
-        opts = ['macros', 'plugins']
+        opts = ["macros", "plugins"]
         return [opt for opt in opts if opt.startswith(text)]
 
     def do_inject(self, arg):
@@ -312,12 +325,12 @@ class GeloShell(cmd.Cmd):
         Usage: `inject TRACK Justice - Fire`
         """
         # parse arg
-        if ' ' not in arg:
+        if " " not in arg:
             print("gelo: inject: invalid command format")
             return False
-        split_point = arg.find(' ')
+        split_point = arg.find(" ")
         marker_type = arg[:split_point].upper()
-        marker = arg[split_point+1:]
+        marker = arg[split_point + 1 :]
         marker_type = arch.MarkerType.from_string(marker_type)
         if marker_type is None:
             print("gelo: inject: invalid marker type")
@@ -334,8 +347,8 @@ class GeloShell(cmd.Cmd):
     def default(self, line):
         """Try running a macro, or display an error message."""
         line = line.strip()
-        if line in self.macros['macros'].keys():
-            self.cmdqueue.extend(self.macros['macros'][line].split("\n"))
+        if line in self.macros["macros"].keys():
+            self.cmdqueue.extend(self.macros["macros"][line].split("\n"))
         else:
             print("gelo: unrecognized command")
 
@@ -344,16 +357,17 @@ class GeloShell(cmd.Cmd):
 
         Usage: `quit`"""
         self.gelo.shutdown()
-        with open(self.macro_file, 'w') as fp:
+        with open(self.macro_file, "w") as fp:
             self.macros.write(fp)
         return True
 
     def completenames(self, text, *ignored):
-        func_name = 'do_' + text
+        func_name = "do_" + text
         commands = [a[3:] for a in self.get_names() if a.startswith(func_name)]
-        macros = [a for a in self.macros['macros'].keys() if a.startswith(text)]
+        macros = [a for a in self.macros["macros"].keys() if a.startswith(text)]
         return commands + macros
 
     def completedefault(self, text, line, begidx, endidx):
-        return [macro for macro in self.macros['macros'].keys() if
-                macro.startsiwth(text)]
+        return [
+            macro for macro in self.macros["macros"].keys() if macro.startsiwth(text)
+        ]

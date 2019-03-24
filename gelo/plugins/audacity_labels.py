@@ -7,7 +7,7 @@ from gelo import arch, conf, mediator
 class AudacityLabels(arch.IMarkerSink):
     """Write every MarkerType.TRACK marker to a CSV file, but with tabs."""
 
-    PLUGIN_MODULE_NAME = 'audacity_labels'
+    PLUGIN_MODULE_NAME = "audacity_labels"
     LINE_TEMPLATE = "{start}\t{finish}\t{label}\n"
 
     def __init__(self, config, mediator: arch.IMediator, show: str):
@@ -19,10 +19,10 @@ class AudacityLabels(arch.IMarkerSink):
         self.collision_count = 0
         self.filename = self.avoid_overwrite_filename()
         self.log.info("Using %s as the data file path" % self.filename)
-        self.delayed = conf.as_bool(self.config['delayed'])
-        self.channel = self.mediator.subscribe([arch.MarkerType.TRACK],
-                                               AudacityLabels.__name__,
-                                               delayed=self.delayed)
+        self.delayed = conf.as_bool(self.config["delayed"])
+        self.channel = self.mediator.subscribe(
+            [arch.MarkerType.TRACK], AudacityLabels.__name__, delayed=self.delayed
+        )
         self.last_marker = None
 
     def run(self):
@@ -32,11 +32,10 @@ class AudacityLabels(arch.IMarkerSink):
                 current_marker = next(self.channel.listen())
                 if not self.is_enabled:
                     continue
-                self.log.debug("Received marker from channel: %s" %
-                               current_marker)
+                self.log.debug("Received marker from channel: %s" % current_marker)
                 if self.last_marker is not None:
                     line = self.create_line(current_marker)
-                    with open(self.filename, 'a') as f:
+                    with open(self.filename, "a") as f:
                         f.write(line)
                     self.last_marker = current_marker
                 else:
@@ -48,69 +47,73 @@ class AudacityLabels(arch.IMarkerSink):
                 self.should_terminate = True
         if self.last_marker is not None:
             self.log.info("Writing final marker to file")
-            with open(self.filename, 'a') as f:
-                f.write(self.LINE_TEMPLATE.format(
-                    start=self.last_marker.time,
-                    finish=self.last_marker.time,
-                    label=self.last_marker.label
-                ))
+            with open(self.filename, "a") as f:
+                f.write(
+                    self.LINE_TEMPLATE.format(
+                        start=self.last_marker.time,
+                        finish=self.last_marker.time,
+                        label=self.last_marker.label,
+                    )
+                )
 
     def create_line(self, marker: arch.Marker) -> str:
-        """Create a line for the file using the current marker and the last one.
-        """
+        """Create a line for the file using the current marker and the last one."""
         return self.LINE_TEMPLATE.format(
             start=self.last_marker.time,
             finish=marker.time,
-            label=self.last_marker.label
+            label=self.last_marker.label,
         )
 
     def avoid_overwrite_filename(self) -> str:
         """Come up with a file name to use for the labels.
 
-        In order to avoid clobbering any data, this function increments the
-        collision counter in the filename until the file no longer exists.
-        This is a bit of a dumb algorithm, but hopefully the number of
-        collisions (program restarts) will be small (< 3).
+        In order to avoid clobbering any data, this function increments the collision
+        counter in the filename until the file no longer exists. This is a bit of a dumb
+        algorithm, but hopefully the number of collisions (program restarts) will be
+        small (< 3).
 
-        If there is no collision avoidance marker in the filename,
-        write a line to the end of the file which indicates the program was
-        restarted.
+        If there is no collision avoidance marker in the filename, write a line to the
+        end of the file which indicates the program was restarted.
         """
         # If there is no collision avoidance marker, write another entry that
         # says the program was restarted.
-        if '{count}' not in self.config['path']:
-            self.log.info("Data file path missing {count} tag, writing restart "
-                          "marker")
-            with open(self.config['path'], 'a') as f:
-                f.write(self.LINE_TEMPLATE.format(
-                    start=0,
-                    finish=0,
-                    label="PROGRAM RESTART"
-                ))
-            return self.config['path']
+        if "{count}" not in self.config["path"]:
+            self.log.info(
+                "Data file path missing {count} tag, writing restart " "marker"
+            )
+            with open(self.config["path"], "a") as f:
+                f.write(
+                    self.LINE_TEMPLATE.format(
+                        start=0, finish=0, label="PROGRAM RESTART"
+                    )
+                )
+            return self.config["path"]
         # Otherwise, find the first unused filename.
-        path = self.config['path'].format(show=self.show,
-                                          count=self.collision_count)
+        path = self.config["path"].format(show=self.show, count=self.collision_count)
         while os.path.exists(path):
             self.collision_count += 1
-            path = self.config['path'].format(show=self.show,
-                                              count=self.collision_count)
+            path = self.config["path"].format(
+                show=self.show, count=self.collision_count
+            )
         return path
 
     def validate_config(self):
         """Ensure the configuration is valid, and perform path expansion."""
         errors = []
-        if 'path' not in self.config.keys():
-            errors.append('[plugin:audacity_markers] is missing the required'
-                          ' key "path"')
+        if "path" not in self.config.keys():
+            errors.append(
+                "[plugin:audacity_markers] is missing the required" ' key "path"'
+            )
         else:
-            self.config['path'] = os.path.expandvars(self.config['path'])
-        if 'delayed' not in self.config.keys():
-            self.config['delayed'] = 'False'
+            self.config["path"] = os.path.expandvars(self.config["path"])
+        if "delayed" not in self.config.keys():
+            self.config["delayed"] = "False"
         else:
-            if not conf.is_bool(self.config['delayed']):
-                errors.append('[plugin:audacity_labels] has a non-boolean '
-                              'value for the key "delayed"')
+            if not conf.is_bool(self.config["delayed"]):
+                errors.append(
+                    "[plugin:audacity_labels] has a non-boolean "
+                    'value for the key "delayed"'
+                )
         # Return errors, if any
         if len(errors) > 0:
             raise conf.InvalidConfigurationError(errors)
