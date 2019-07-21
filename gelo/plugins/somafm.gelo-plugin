@@ -1,6 +1,6 @@
 [Core]
 Name = SomaFM
-Module = somafm
+Module = SomaFM
 
 [Documentation]
 Description = Announce track names from Soma.FM

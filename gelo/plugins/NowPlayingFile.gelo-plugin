@@ -1,6 +1,6 @@
 [Core]
 Name = NowPlayingFile
-Module = now_playing_file
+Module = NowPlayingFile
    
 [Documentation]
 Description = Write a single-line text file with the marker name, for BUTT.

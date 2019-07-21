@@ -1,6 +1,6 @@
 [Core]
 Name = HttpPusher
-Module = http_pusher
+Module = HttpPusher
 
 [Documentation]
 Description = Connect to an HTTP(S) endpoint to send marker data

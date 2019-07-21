@@ -1,6 +1,6 @@
 [Core]
-Name = Irc
-Module = irc
+Name = IRC
+Module = IRC
 
 [Documentation]
 Description = Connect to an IRC server to send chapter marks.

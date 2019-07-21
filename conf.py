@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = "Gelo"
-copyright = "2018, s0ph0s"
+copyright = "2019, s0ph0s"
 author = "s0ph0s"
 
 # The short X.Y version
-version = "1.1"
+version = "4.0"
 # The full version, including alpha/beta/rc tags
-release = "v1.1.0"
+release = "v4.0.0"
 
 
 # -- General configuration ---------------------------------------------------

@@ -10,7 +10,7 @@ from gelo import arch, conf
 class OneEightyOneFM(arch.IMarkerSource):
     """Connect to a 181.FM stream and announce their markers."""
 
-    PLUGIN_MODULE_NAME = "one_eighty_one_fm"
+    PLUGIN_MODULE_NAME = "OneEightyOneFM"
     HEADERS = {
         "Icy-MetaData": "1",
         "User-Agent": "gelo/3.2, one_eighty_one_fm/1.0: "

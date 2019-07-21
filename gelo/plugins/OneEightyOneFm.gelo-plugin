@@ -1,6 +1,6 @@
 [Core]
 Name = OneEightyOneFM
-Module = one_eighty_one_fm
+Module = OneEightyOneFM
 
 [Documentation]
 Description = Announce track names from 181.FM

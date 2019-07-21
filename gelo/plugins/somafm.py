@@ -7,10 +7,10 @@ import http.client
 from gelo import arch, conf
 
 
-class SomaFm(arch.IMarkerSource):
+class SomaFM(arch.IMarkerSource):
     """Connect to a Soma.FM stream and announce their markers."""
 
-    PLUGIN_MODULE_NAME = "somafm"
+    PLUGIN_MODULE_NAME = "SomaFM"
     HEADERS = {
         "Icy-MetaData": "1",
         "User-Agent": "gelo/3.2, somafm/1.0: https://github.com/s0ph0s-2/gelo",

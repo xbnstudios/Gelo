@@ -7,7 +7,7 @@ from gelo import arch, conf, mediator
 class AudacityLabels(arch.IMarkerSink):
     """Write every MarkerType.TRACK marker to a CSV file, but with tabs."""
 
-    PLUGIN_MODULE_NAME = "audacity_labels"
+    PLUGIN_MODULE_NAME = "AudacityLabels"
     LINE_TEMPLATE = "{start}\t{finish}\t{label}\n"
 
     def __init__(self, config, mediator: arch.IMediator, show: str):

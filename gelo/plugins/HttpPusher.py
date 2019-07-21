@@ -9,7 +9,7 @@ import requests
 class HttpPusher(gelo.arch.IMarkerSink):
     """Push the marker to an HTTP endpoint."""
 
-    PLUGIN_MODULE_NAME = "http_pusher"
+    PLUGIN_MODULE_NAME = "HttpPusher"
 
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new HttpPusher."""

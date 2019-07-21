@@ -1,6 +1,6 @@
 [Core]
 Name = HttpPoller
-Module = http_poller
+Module = HttpPoller
 
 [Documentation]
 Description = Poll an HTTP server for marker data every 0.25 seconds.

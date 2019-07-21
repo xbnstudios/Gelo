@@ -1,6 +1,6 @@
 [Core]
 Name = Tweeter
-Module = tweeter
+Module = Tweeter
    
 [Documentation]
 Description = Tweet the marker.

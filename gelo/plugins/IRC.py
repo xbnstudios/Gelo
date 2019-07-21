@@ -11,7 +11,7 @@ import irc.client
 class IRC(gelo.arch.IMarkerSink):
     """Connect to IRC to send track names."""
 
-    PLUGIN_MODULE_NAME = "irc"
+    PLUGIN_MODULE_NAME = "IRC"
 
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         super().__init__(config, mediator, show)
