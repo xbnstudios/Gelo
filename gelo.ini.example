@@ -19,9 +19,9 @@ macro_file=$HOME/.config/gelo/macros.ini
 broadcast_delay = 8.0
 
 #
-# plugin:http_poller: Configure the HTTP poller metadata source
+# plugin:HttpPoller: Configure the HTTP poller metadata source
 #
-[plugin:http_poller]
+[plugin:HttpPoller]
 # poll_url
 # The URL to poll for markers
 poll_url=http://localhost:8080/nowplaying.xsl
@@ -33,9 +33,9 @@ poll_url=http://localhost:8080/nowplaying.xsl
 prefix_file = /tmp/prefix.txt
 
 #
-# plugin:tweeter: Configure the Twitter plugin
+# plugin:Tweeter: Configure the Twitter plugin
 #
-[plugin:tweeter]
+[plugin:Tweeter]
 ########
 # NOTE #
 ########
@@ -77,10 +77,10 @@ announce_string=Now Playing{special}: {marker}
 ;delayed = True
 
 #
-# plugin:now_playing_file: A text file that contains a single line with the
+# plugin:NowPlayingFile: A text file that contains a single line with the
 # current marker data
 #
-[plugin:now_playing_file]
+[plugin:NowPlayingFile]
 # path
 # The path to write the now playing file to.  Environment variable expansion is
 # performed on this string value.
@@ -91,9 +91,9 @@ path=$HOME/Desktop/np.txt
 
 
 #
-# plugin:irc: Configure the IRC client plugin
+# plugin:IRC: Configure the IRC client plugin
 #
-[plugin:irc]
+[plugin:IRC]
 # nick
 # The IRC nick to use when connecting
 nick=gelo
@@ -135,9 +135,9 @@ message=Now Playing{special}: {marker}
 ;delayed = True
 
 #
-# plugin:audacity_labels: Configure the Audacity Labels plugin
+# plugin:AudacityLabels: Configure the Audacity Labels plugin
 #
-[plugin:audacity_labels]
+[plugin:AudacityLabels]
 # path
 # The path to write the file to. Environment variable expansion is performed on
 # this string value, and "{show}" will be replaced by the show that Gelo was
@@ -150,9 +150,9 @@ path=$HOME/Desktop/{show}-{count}.txt
 ;delayed = False
 
 #
-# plugin:http_pusher: Configure the HTTP Pusher plugin
+# plugin:HttpPusher: Configure the HTTP Pusher plugin
 #
-[plugin:http_pusher]
+[plugin:HttpPusher]
 # url
 # The URL to connect to, with no arguments. HTTPS is supported.
 url = https://example.com/now_playing
@@ -176,9 +176,9 @@ marker_param = song
 ;delayed = False
 
 #
-# plugin:somafm: Configure the SomaFM plugin
+# plugin:SomaFM: Configure the SomaFM plugin
 #
-[plugin:somafm]
+[plugin:SomaFM]
 # stream_url
 # The URL of the SomaFM stream to connect to.  Must be a direct link, not a
 # playlist link.  Also, only HTTP MP3 streams are supported, because they're
@@ -202,9 +202,9 @@ marker_prefix = "(Pre-Show) "
 start_disabled = True
 
 #
-# plugin:181fm: Configure the 181.FM plugin
+# plugin:OneEightyOneFM: Configure the 181.FM plugin
 #
-[plugin:one_eighty_one_fm]
+[plugin:OneEightyOneFM]
 # stream_url
 # The URL of the 181.FM stream to connect to.  Must be a direct link, not a
 # playlist link.  Also, only HTTP MP3 streams are supported, because they're

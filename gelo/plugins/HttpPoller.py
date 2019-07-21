@@ -8,7 +8,7 @@ from time import time, sleep
 class HttpPoller(arch.IMarkerSource):
     """Poll an HTTP server of some description for markers."""
 
-    PLUGIN_MODULE_NAME = "http_poller"
+    PLUGIN_MODULE_NAME = "HttpPoller"
 
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new instance of HttpPoller."""

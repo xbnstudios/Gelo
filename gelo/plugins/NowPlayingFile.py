@@ -6,7 +6,7 @@ import queue
 class NowPlayingFile(arch.IMarkerSink):
     """Write the current TRACK marker to a text file."""
 
-    PLUGIN_MODULE_NAME = "now_playing_file"
+    PLUGIN_MODULE_NAME = "NowPlayingFile"
 
     def __init__(self, config, med: arch.IMediator, show: str):
         """Create a new NowPlayingFile marker sink."""

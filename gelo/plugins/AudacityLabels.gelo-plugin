@@ -1,6 +1,6 @@
 [Core]
 Name = AudacityLabels
-Module = audacity_labels
+Module = AudacityLabels
    
 [Documentation]
 Description = Create an Audacity label file from the markers.

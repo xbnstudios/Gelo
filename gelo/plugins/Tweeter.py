@@ -10,7 +10,7 @@ import twitter.error
 class Tweeter(gelo.arch.IMarkerSink):
     """Tweet the tracks that you play."""
 
-    PLUGIN_MODULE_NAME = "tweeter"
+    PLUGIN_MODULE_NAME = "Tweeter"
 
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new Tweeter."""

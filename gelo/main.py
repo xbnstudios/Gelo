@@ -38,7 +38,7 @@ class GeloPluginManager(PluginManager.PluginManager):
     ):
         """Instantiate a plugin.
         The typo is intentional, because that's how the framework spells it."""
-        c = self.config.configparser["plugin:" + plugin_module_name]
+        c = self.config.configparser["plugin:" + element_name]
         return element(c, self.mediator, self.show)
 
     def instanciateElement(self, element):
