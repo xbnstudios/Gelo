@@ -39,7 +39,7 @@ class NowPlayingFile(arch.IMarkerSink):
         errors = []
         if "path" not in self.config.keys():
             errors.append(
-                '[plugin:now_playing_file] is missing the required key "path"'
+                '["plugin:NowPlayingFile"] is missing the required key "path"'
             )
         else:
             self.config["path"] = os.path.expandvars(self.config["path"])
@@ -48,7 +48,7 @@ class NowPlayingFile(arch.IMarkerSink):
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    "[plugin:now_playing_file] has a non-boolean "
+                    '["plugin:NowPlayingFile"] has a non-boolean '
                     'value for the key "delayed"'
                 )
         # Return errors, if any

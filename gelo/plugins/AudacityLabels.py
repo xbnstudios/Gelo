@@ -102,16 +102,16 @@ class AudacityLabels(arch.IMarkerSink):
         errors = []
         if "path" not in self.config.keys():
             errors.append(
-                "[plugin:audacity_markers] is missing the required" ' key "path"'
+                '["plugin:AudacityLabels"] is missing the required key "path"'
             )
         else:
             self.config["path"] = os.path.expandvars(self.config["path"])
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = "False"
+            self.config["delayed"] = False
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    "[plugin:audacity_labels] has a non-boolean "
+                    '["plugin:AudacityLabels"] has a non-boolean '
                     'value for the key "delayed"'
                 )
         # Return errors, if any

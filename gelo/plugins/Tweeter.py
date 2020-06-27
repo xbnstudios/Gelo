@@ -78,26 +78,26 @@ class Tweeter(gelo.arch.IMarkerSink):
             errors.append('[plugin:tweeter] is missing the required key "consumer_key"')
         if "consumer_secret" not in self.config.keys():
             errors.append(
-                '[plugin:tweeter] is missing the required key "consumer_secret"'
+                '["plugin:Tweeter"] is missing the required key "consumer_secret"'
             )
         if "access_token_key" not in self.config.keys():
             errors.append(
-                '[plugin:tweeter] is missing the required key "access_token_key"'
+                '["plugin:Tweeter"] is missing the required key "access_token_key"'
             )
         if "access_token_secret" not in self.config.keys():
             errors.append(
-                '[plugin:tweeter] is missing the required key "access_token_secret"'
+                '["plugin:Tweeter"] is missing the required key "access_token_secret"'
             )
         if "announce_string" not in self.config.keys():
             errors.append(
-                '[plugin:tweeter] is missing the required key "announce_string"'
+                '["plugin:Tweeter"] is missing the required key "announce_string"'
             )
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = "True"
+            self.config["delayed"] = True
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    '[plugin:tweeter] has a non-boolean value for the key "delayed"'
+                    '["plugin:Tweeter"] has a non-boolean value for the key "delayed"'
                 )
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)
@@ -105,4 +105,4 @@ class Tweeter(gelo.arch.IMarkerSink):
 
 def register():
     """Authorize this app to tweet from your account."""
-    print("I haven't written this yet. Check back in v1.3.")
+    print("I haven't written this yet. Check back in the future.")

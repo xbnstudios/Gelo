@@ -113,7 +113,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
         errors = []
 
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = "False"
+            self.config["delayed"] = False
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
