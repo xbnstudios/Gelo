@@ -8,7 +8,7 @@ class Configuration(object):
     I split this out to reduce coupling between Gelo and ConfigParser."""
 
     def __init__(
-        self, config_file: configparser.ConfigParser, args: argparse.Namespace
+        self, config_file: dict, args: argparse.Namespace
     ):
         """Create a Configuration."""
         self.validate_config_file(config_file)
@@ -28,11 +28,11 @@ class Configuration(object):
         self.macro_file = os.path.expandvars(config_file["core"]["macro_file"])
         self.configparser = config_file
         self.show = args.show
-        self.broadcast_delay = float(config_file.get("core", "broadcast_delay"))
+        self.broadcast_delay = float(config_file["core"]["broadcast_delay"])
         self.log_level = self.get_log_level(args.verbose)
 
     @staticmethod
-    def validate_config_file(config_file: configparser.ConfigParser):
+    def validate_config_file(config_file: dict):
         """Check to see if the configuration file is valid.
         This is currently probably inadequate. It just looks for the [core]
         section."""
@@ -50,7 +50,7 @@ class Configuration(object):
                 errors.append(
                     "[core] has a non-float value for the key " '"broadcast_delay"'
                 )
-            elif float(config_file.get("core", "broadcast_delay")) < 0:
+            elif float(config_file["core"]["broadcast_delay"]) < 0:
                 errors.append(
                     "[core] has a negative value for the key " '"broadcast_delay"'
                 )

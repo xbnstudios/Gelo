@@ -5,37 +5,37 @@
 # user_plugin_dir
 # The location of additional plugins.  Environment variable expansion is
 # performed on this string value.
-user_plugin_dir=$HOME/.config/gelo/plugins
+user_plugin_dir="$HOME/.config/gelo/plugins"
 # log_file
 # The file to log to.  Environment variable expansion is performed on this
 # string value.
-log_file=$HOME/.config/gelo/gelo.log
+log_file="$HOME/.config/gelo/gelo.log"
 # macro_file
 # The file in which macros should be saved
-macro_file=$HOME/.config/gelo/macros.ini
+macro_file="$HOME/.config/gelo/macros.ini"
 # broadcast_delay
 # How long the system should wait before pushing markers from a source to all of
 # the sinks.
-broadcast_delay = 8.0
+broadcast_delay = "8.0"
 
 #
 # plugin:HttpPoller: Configure the HTTP poller metadata source
 #
-[plugin:HttpPoller]
+["plugin:HttpPoller"]
 # poll_url
 # The URL to poll for markers
-poll_url=http://localhost:8080/nowplaying.xsl
+poll_url="http://localhost:8080/nowplaying.xsl"
 # prefix_file
 # The place to look for the now playing prefix.  This is sort of a hack, unless
 # I find a better way of doing what I want to accomplish.  If there is any text
 # in parenthesis on the first line of this file, it will be added to the marker
 # as a special status field.
-prefix_file = /tmp/prefix.txt
+prefix_file = "/tmp/prefix.txt"
 
 #
 # plugin:Tweeter: Configure the Twitter plugin
 #
-[plugin:Tweeter]
+["plugin:Tweeter"]
 ########
 # NOTE #
 ########
@@ -51,178 +51,195 @@ prefix_file = /tmp/prefix.txt
 # consumer_key
 # The Twitter API key for this application, found under Keys and Access Tokens
 # on the Twitter Application Management page (apps.twitter.com)
-;consumer_key =
+;consumer_key =""
 # consumer_secret
 # The Twitter API secret for this application, found under Keys and Access
 # Tokens on the Twitter Application Management page (apps.twitter.com)
-;consumer_secret =
+;consumer_secret =""
 # access_token_key
 # The Twitter API access token to allow this app to tweet using your account,
 # found under Keys and Access Tokens on the Twitter Application Management page
 # (apps.twitter.com).
-;access_token_key =
+;access_token_key =""
 # access_token_secret
 # The Twitter API access token secret to allow this app to tweet using your
 # account, found under Keys and Access Tokens on the Twitter Application
 # Management page (apps.twitter.com).
-;access_token_secret =
+;access_token_secret =""
 
 # announce_string
 # The string that will be tweeted. "{marker}" will be substituted for the text
 # sent by the marker source.  "{special}" will be substituted for " (...)",
 # where the ellipsis is any special status attached to the marker.
-announce_string=Now Playing{special}: {marker}
+announce_string="Now Playing{special}: {marker}"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default True
-;delayed = True
+;delayed = "True"
 
 #
 # plugin:NowPlayingFile: A text file that contains a single line with the
 # current marker data
 #
-[plugin:NowPlayingFile]
+["plugin:NowPlayingFile"]
 # path
 # The path to write the now playing file to.  Environment variable expansion is
 # performed on this string value.
-path=$HOME/Desktop/np.txt
+path="$HOME/Desktop/np.txt"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = False
+;delayed = "False"
 
 
 #
 # plugin:IRC: Configure the IRC client plugin
 #
-[plugin:IRC]
+["plugin:IRC"]
 # nick
 # The IRC nick to use when connecting
-nick=gelo
+nick="gelo"
 # nickserv_pass
 # The password to use when authenticating with NickServ. Set to the empty string
 # if you don't need that feature.
-nickserv_pass=
+nickserv_pass=""
 # server
 # The IRC server to connect to
-server=irc.example.com
+server="irc.example.com"
 # port
 # The TCP port to connect to on the IRC server
-port=6697
+port="6697"
 # tls
 # Enable TLS for the IRC connection.  Probably also in combination with
-# port=6697
-tls=True
+# port="6697"
+tls="True"
 # ipv6
 # Force the IRC connection over IPv6. I'm not entirely sure what the underlying
 # framework does with this, so maybe it falls back intelligently?
-ipv6=True
+ipv6="True"
 # send_to
 # The nick (or channel) to which to send messages
-send_to=#test
+send_to="#test"
 # repeat_with
 # Repeat the message with these strings (usually channels, although you could
 # get creative with it...).  Separate items with a comma. To disable this
 # behavior and just send one message, comment out this key.
-;repeat_with=#channel,#channel2,#channel3
+;repeat_with="#channel,#channel2,#channel3"
 # message
 # The message to send. The group {marker} will be replaced with the marker text.
 # The group {special} will be replaced with a special indicator, if the marker
 # has a special status. The indicator has a space before it, so take that into
 # account when creating this string. If repeat_with is defined, the message will
 # be repeated, each time substituting in one of the items for {item}.
-message=Now Playing{special}: {marker}
+message="Now Playing{special}: {marker}"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default True
-;delayed = True
+;delayed = "True"
 
 #
 # plugin:AudacityLabels: Configure the Audacity Labels plugin
 #
-[plugin:AudacityLabels]
+["plugin:AudacityLabels"]
 # path
 # The path to write the file to. Environment variable expansion is performed on
 # this string value, and "{show}" will be replaced by the show that Gelo was
 # started with. Additionally, "{count}" will be replaced with a 4-character,
 # zero-padded number to avoid overwriting existing files with the same name.
 # Audacity expects this file to end with ".txt".
-path=$HOME/Desktop/{show}-{count}.txt
+path="$HOME/Desktop/{show}-{count}.txt"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = False
+;delayed = "False"
 
 #
 # plugin:HttpPusher: Configure the HTTP Pusher plugin
 #
-[plugin:HttpPusher]
+["plugin:HttpPusher"]
+# delayed
+# Delay this plugin's output by the broadcast delay from above? Default False
+;delayed = "False"
+
+# One of the webhooks for the HTTP Pusher plugin to send a request to.
+# Make more by copying this section and changing "example" in the section header to the
+# name that you'd like your new webhook to have.
+["plugin:HttpPusher".webhooks.example]
 # url
 # The URL to connect to, with no arguments. HTTPS is supported.
-url = https://example.com/now_playing
+url = "https://example.com/now_playing"
 # method
 # The HTTP method that the endpoint expects you to use. Currently only GET and
 # POST are supported, and you should *really* be using POST.
-method = POST
+method = "POST"
 # api_key_param
 # The argument name where the endpoint expects to find an API key, because it's
 # not just exposed to the public, right? If your system is bad, comment this key
 # out to disable sending an API key.
-api_key_param = api_key
+api_key_param = "api_key"
 # api_key
 # The API key to send, for authentication purposes.
-api_key = nonsense
+api_key = "nonsense"
 # marker_param
 # The argument name where the endpoint expects to find the marker text.
-marker_param = song
-# delayed
-# Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = False
+marker_param = "song"
+# show_slug_param
+# The argument name where the endpoint expects to find the show slug.  Comment this key
+out to disable sending the show slug.
+show_slug_param = "slug"
+# show_episode_param
+# The argument name where the endpoint expects to find the episode of the show.  Comment
+# this key out to disable sending the episode number.  (Note that episode numbers are
+# not always numeric. See -x episodes.)
+show_episode_param = "episode"
+# extra_delay
+# Add more delay before sending markers to this webhook.  Positive delays only.
+extra_delay = "8.0"
 
 #
 # plugin:SomaFM: Configure the SomaFM plugin
 #
-[plugin:SomaFM]
+["plugin:SomaFM"]
 # stream_url
 # The URL of the SomaFM stream to connect to.  Must be a direct link, not a
 # playlist link.  Also, only HTTP MP3 streams are supported, because they're
 # really easy to decode metadata from.
-stream_url = http://ice1.somafm.com/groovesalad-128-mp3
+stream_url = "http://ice1.somafm.com/groovesalad-128-mp3"
 # source_name
 # The bit in parentheses when this track is announced.
-source_name = from Groove Salad on Soma.FM
+source_name = "from Groove Salad on Soma.FM"
 # extra_delay
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from Soma.FM to you.
-extra_delay = 1
+extra_delay = "1"
 # marker_prefix
 # Prepend a string to the track before it gets sent out.  Useful for indicating
 # some additional information to listeners.  This value must be quoted with
 # double-quotes in order to prevent trailing spaces from being stripped off.
-marker_prefix = "(Pre-Show) "
+marker_prefix = "\"(Pre-Show) \""
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
-start_disabled = True
+start_disabled = "True"
 
 #
 # plugin:OneEightyOneFM: Configure the 181.FM plugin
 #
-[plugin:OneEightyOneFM]
+["plugin:OneEightyOneFM"]
 # stream_url
 # The URL of the 181.FM stream to connect to.  Must be a direct link, not a
 # playlist link.  Also, only HTTP MP3 streams are supported, because they're
 # really easy to decode metadata from.
-stream_url = http://listen.livestreamingservice.com/181-eagle_128k.mp3
+stream_url = "http://listen.livestreamingservice.com/181-eagle_128k.mp3"
 # source_name
 # The bit in parentheses when this track is announced.
-source_name = from The Eagle at 181.FM
+source_name = "from The Eagle at 181.FM"
 # extra_delay
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from 181.FM to you.
-extra_delay = 1
+extra_delay = "1"
 # marker_prefix
 # Prepend a string to the track before it gets sent out.  Useful for indicating
 # some additional information to listeners.  This value must be quoted with
 # double-quotes in order to prevent trailing spaces from being stripped off.
-marker_prefix = "(Pre-Show) "
+marker_prefix = "\"(Pre-Show) \""
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
-start_disabled = True
+start_disabled = "True"

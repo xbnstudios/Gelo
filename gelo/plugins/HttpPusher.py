@@ -4,6 +4,7 @@ import gelo.mediator
 import queue
 import logging
 import requests
+from threading import Timer
 
 
 class HttpPusher(gelo.arch.IMarkerSink):
@@ -17,12 +18,24 @@ class HttpPusher(gelo.arch.IMarkerSink):
         self.log = logging.getLogger("gelo.plugins.HttpPusher")
         self.validate_config()
         self.log.debug("Configuration valid")
-        self.url = self.config["url"]
-        self.method = self.config["method"]
-        self.api_key = self.config["api_key"]
-        self.api_key_param = self.config["api_key_param"]
-        self.marker_param = self.config["marker_param"]
+        self.webhooks = self.config["webhooks"]
         self.delayed = gelo.conf.as_bool(self.config["delayed"])
+        show_split = show.split("-")
+        if len(show_split) < 2:
+            self.log.warning(
+                "Show argument on console not in the form of slug-###, "
+                "using default values"
+            )
+            self.show_slug = "default"
+            self.show_episode = "1"
+        else:
+            self.show_slug = show_split[0]
+            self.show_episode = show_split[1]
+        for webhook in self.webhooks:
+            if "extra_delay" in self.webhooks[webhook]:
+                self.webhooks[webhook]["extra_delay"] = float(
+                    self.webhooks[webhook]["extra_delay"]
+                )
         self.channel = self.mediator.subscribe(
             [gelo.arch.MarkerType.TRACK], HttpPusher.__name__, delayed=self.delayed
         )
@@ -37,62 +50,122 @@ class HttpPusher(gelo.arch.IMarkerSink):
                 if not self.is_enabled:
                     continue
                 self.log.debug("Received marker from channel: %s" % marker)
-                self.request(marker)
+                self.request_all(marker)
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
                 self.should_terminate = True
 
-    def request(self, marker: gelo.arch.Marker):
-        """Make the HTTP request."""
-        payload = {self.marker_param: marker.label, self.api_key_param: self.api_key}
+    def request_all(self, marker: gelo.arch.Marker):
+        """Make HTTP requests to every webhook."""
+        for name, options in self.webhooks.items():
+            if "extra_delay" in options.keys():
+                self.log.debug("Delaying marker for {} by {} seconds…".format(name, options["extra_delay"]))
+                delay = Timer(options["extra_delay"], self.request,
+                              args=[marker, name, options])
+                delay.start()
+            else:
+                self.log.debug("Sending marker for {} immediately…".format(name))
+                self.request(marker, name, options)
+
+    def request(
+        self, marker: gelo.arch.Marker, webhook_name: str, webhook_options: dict
+    ):
+        """Make one single HTTP request."""
+        # Populate the payload object. Requests will turn this into form values for
+        # POST and URL parameters for GET.
+        payload = {webhook_options["marker_param"]: marker.label}
+        # All of these are optional config keys.
+        if "api_key_param" in webhook_options:
+            # The config validator function checks to ensure api_key is present.
+            payload[webhook_options["api_key_param"]] = webhook_options["api_key"]
+        if "show_slug_param" in webhook_options:
+            payload[webhook_options["show_slug_param"]] = self.show_slug
+        if "show_episode_param" in webhook_options:
+            payload[webhook_options["show_episode_param"]] = self.show_episode
+
         r = None
-        if self.method == "GET":
-            self.log.warning("Non-repeatable GET requests are bad...")
-            r = self.session.get(self.url, params=payload)
-        elif self.method == "POST":
-            r = self.session.post(self.url, data=payload)
+        if webhook_options["method"] == "GET":
+            self.log.warning(
+                "[{}] Non-repeatable GET requests are bad...".format(webhook_name)
+            )
+            r = self.session.get(webhook_options["url"], params=payload)
+        elif webhook_options["method"] == "POST":
+            r = self.session.post(webhook_options["url"], data=payload)
         if r is not None and r.status_code == 200:
-            self.log.info("Request made successfully.")
+            self.log.info("Request to {} made successfully.".format(webhook_name))
         elif r is not None:
-            self.log.info("Request failed: %s" % r.text)
+            self.log.info("Request to {} failed: {}".format(webhook_name, r.text))
         else:
-            self.log.info("Request failed: response object was None (shouldn't happen)")
+            self.log.info(
+                "Request to {} failed: response object was None (shouldn't happen)".format(
+                    webhook_name
+                )
+            )
 
     def validate_config(self):
         """Ensure the configuration file is valid."""
         errors = []
-        if "url" not in self.config.keys():
-            errors.append("[plugin:http_pusher] is missing the required key" ' "url"')
-        if "api_key" not in self.config.keys():
-            errors.append(
-                "[plugin:http_pusher] is missing the required key" ' "api_key"'
-            )
-        if "method" not in self.config.keys():
-            errors.append(
-                "[plugin:http_pusher] is missing the required key" ' "method"'
-            )
-        else:
-            if self.config["method"] not in ["GET", "POST"]:
-                errors.append(
-                    "[plugin:http_pusher] has an unsupported HTTP "
-                    'method listed for the key "method".'
-                )
-        if "api_key_param" not in self.config.keys():
-            errors.append(
-                "[plugin:http_pusher] is missing the required key" ' "api_key_param"'
-            )
-        if "marker_param" not in self.config.keys():
-            errors.append(
-                "[plugin:http_pusher] is missing the required key" ' "marker_param"'
-            )
+
         if "delayed" not in self.config.keys():
             self.config["delayed"] = "False"
         else:
             if not gelo.conf.is_bool(self.config["delayed"]):
                 errors.append(
-                    "[plugin:http_pusher] has a non-boolean value "
-                    'for the key "delayed"'
+                    '["plugin:HttpPusher"] has a non-boolean value for the key "delayed"'
                 )
+        if "webhooks" not in self.config.keys():
+            errors.append(
+                '["plugin:HttpPusher"] is missing a webhooks table. Create a section '
+                'titled ["plugin:HttpPusher".webhooks.your_webhook] and follow the '
+                "example config."
+            )
+        else:
+            for name, options in self.config["webhooks"].items():
+                errors.extend(self.validate_config_for_webhook(options, name))
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)
+
+    def validate_config_for_webhook(self, webhook_options: dict, webhook_name: str):
+        """Ensure the portion of the configuration file for one webhook is valid."""
+        errors = []
+        if "url" not in webhook_options.keys():
+            errors.append(
+                '["plugin:HttpPusher".webhooks.{}] is missing the required key "url"'.format(
+                    webhook_name
+                )
+            )
+        if "api_key_param" in webhook_options.keys():
+            if "api_key" not in webhook_options.keys():
+                errors.append(
+                    '["plugin:HttpPusher".webhooks.{}] is missing the required key "api_key"'.format(
+                        webhook_name
+                    )
+                )
+        if "method" not in webhook_options.keys():
+            errors.append(
+                '["plugin:HttpPusher".webhooks.{}] is missing the required key "method"'.format(
+                    webhook_name
+                )
+            )
+        else:
+            if webhook_options["method"] not in ["GET", "POST"]:
+                errors.append(
+                    '["plugin:HttpPusher".webhooks.{}] has an unsupported HTTP method listed for the key "method". Choose GET or POST.'.format(
+                        webhook_name
+                    )
+                )
+        if "marker_param" not in webhook_options.keys():
+            errors.append(
+                '["plugin:HttpPusher".webhooks.{}] is missing the required key "marker_param"'.format(
+                    webhook_name
+                )
+            )
+        if "extra_delay" in webhook_options.keys():
+            if not gelo.conf.is_float(webhook_options["extra_delay"]):
+                errors.append(
+                    '["plugin:HttpPusher".webhooks.{}] has a non-float value for the key "extra_delay"'.format(
+                        webhook_name
+                    )
+                )
+        return errors
