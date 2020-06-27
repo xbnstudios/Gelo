@@ -46,11 +46,11 @@ class Configuration(object):
         if "broadcast_delay" not in config_file["core"].keys():
             errors.append("[core] is missing the required key " '"broadcast_delay"')
         else:
-            if not is_float(config_file["core"]["broadcast_delay"]):
+            if type(config_file["core"]["broadcast_delay"]) is not float:
                 errors.append(
                     "[core] has a non-float value for the key " '"broadcast_delay"'
                 )
-            elif float(config_file["core"]["broadcast_delay"]) < 0:
+            elif config_file["core"]["broadcast_delay"] < 0:
                 errors.append(
                     "[core] has a negative value for the key " '"broadcast_delay"'
                 )
@@ -77,49 +77,3 @@ class Configuration(object):
 
 class InvalidConfigurationError(Exception):
     """Used to indicate that the configuration is invalid."""
-
-
-def is_int(value: str) -> bool:
-    """Check to see if the value passed is an integer.
-
-    :return: True if the value can be converted to an integer,
-    False otherwise."""
-    try:
-        int(value)
-    except ValueError:
-        return False
-    else:
-        return True
-
-
-def is_float(value: str) -> bool:
-    """Check to see if the value passed is a float.
-
-    :return: True if the value can be converted to a float,
-    False otherwise."""
-    try:
-        float(value)
-    except ValueError:
-        return False
-    else:
-        return True
-
-
-def is_bool(value: str) -> bool:
-    """Check to see if the value passed is parsable as a boolean.
-
-    :return: True if ``value`` is one of yes, no, true, false, 1, 0, on, or off.
-    """
-    return value.lower() in ["yes", "no", "true", "false", "1", "0", "on", "off"]
-
-
-def as_bool(value: str) -> bool:
-    """Parse the value as a boolean.
-
-    :return: True if ``value`` parses as true, False if ``value`` parses as
-    false.
-    :raises: ValueError if ``value`` is not parsable as a boolean.
-    """
-    if not is_bool(value):
-        raise ValueError("%s cannot be coerced to a boolean" % value)
-    return value.lower() in ["yes", "true", "1", "on"]

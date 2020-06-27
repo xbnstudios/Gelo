@@ -19,7 +19,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
         self.validate_config()
         self.log.debug("Configuration valid")
         self.webhooks = self.config["webhooks"]
-        self.delayed = gelo.conf.as_bool(self.config["delayed"])
+        self.delayed = self.config["delayed"]
         show_split = show.split("-")
         if len(show_split) < 2:
             self.log.warning(
@@ -60,9 +60,14 @@ class HttpPusher(gelo.arch.IMarkerSink):
         """Make HTTP requests to every webhook."""
         for name, options in self.webhooks.items():
             if "extra_delay" in options.keys():
-                self.log.debug("Delaying marker for {} by {} seconds…".format(name, options["extra_delay"]))
-                delay = Timer(options["extra_delay"], self.request,
-                              args=[marker, name, options])
+                self.log.debug(
+                    "Delaying marker for {} by {} seconds…".format(
+                        name, options["extra_delay"]
+                    )
+                )
+                delay = Timer(
+                    options["extra_delay"], self.request, args=[marker, name, options]
+                )
                 delay.start()
             else:
                 self.log.debug("Sending marker for {} immediately…".format(name))
@@ -110,7 +115,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
         if "delayed" not in self.config.keys():
             self.config["delayed"] = "False"
         else:
-            if not gelo.conf.is_bool(self.config["delayed"]):
+            if type(self.config["delayed"]) is not bool:
                 errors.append(
                     '["plugin:HttpPusher"] has a non-boolean value for the key "delayed"'
                 )
@@ -162,7 +167,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
                 )
             )
         if "extra_delay" in webhook_options.keys():
-            if not gelo.conf.is_float(webhook_options["extra_delay"]):
+            if type(webhook_options["extra_delay"]) is not float:
                 errors.append(
                     '["plugin:HttpPusher".webhooks.{}] has a non-float value for the key "extra_delay"'.format(
                         webhook_name

@@ -16,7 +16,7 @@ macro_file="$HOME/.config/gelo/macros.ini"
 # broadcast_delay
 # How long the system should wait before pushing markers from a source to all of
 # the sinks.
-broadcast_delay = "8.0"
+broadcast_delay = 8.0
 
 #
 # plugin:HttpPoller: Configure the HTTP poller metadata source
@@ -51,21 +51,21 @@ prefix_file = "/tmp/prefix.txt"
 # consumer_key
 # The Twitter API key for this application, found under Keys and Access Tokens
 # on the Twitter Application Management page (apps.twitter.com)
-;consumer_key =""
+#consumer_key =""
 # consumer_secret
 # The Twitter API secret for this application, found under Keys and Access
 # Tokens on the Twitter Application Management page (apps.twitter.com)
-;consumer_secret =""
+#consumer_secret =""
 # access_token_key
 # The Twitter API access token to allow this app to tweet using your account,
 # found under Keys and Access Tokens on the Twitter Application Management page
 # (apps.twitter.com).
-;access_token_key =""
+#access_token_key =""
 # access_token_secret
 # The Twitter API access token secret to allow this app to tweet using your
 # account, found under Keys and Access Tokens on the Twitter Application
 # Management page (apps.twitter.com).
-;access_token_secret =""
+#access_token_secret =""
 
 # announce_string
 # The string that will be tweeted. "{marker}" will be substituted for the text
@@ -74,7 +74,7 @@ prefix_file = "/tmp/prefix.txt"
 announce_string="Now Playing{special}: {marker}"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default True
-;delayed = "True"
+#delayed = true
 
 #
 # plugin:NowPlayingFile: A text file that contains a single line with the
@@ -87,7 +87,7 @@ announce_string="Now Playing{special}: {marker}"
 path="$HOME/Desktop/np.txt"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = "False"
+#delayed = false
 
 
 #
@@ -98,31 +98,31 @@ path="$HOME/Desktop/np.txt"
 # The IRC nick to use when connecting
 nick="gelo"
 # nickserv_pass
-# The password to use when authenticating with NickServ. Set to the empty string
+# The password to use when authenticating with NickServ. Comment out this key
 # if you don't need that feature.
-nickserv_pass=""
+#nickserv_pass="secret"
 # server
 # The IRC server to connect to
 server="irc.example.com"
 # port
 # The TCP port to connect to on the IRC server
-port="6697"
+port=6697
 # tls
 # Enable TLS for the IRC connection.  Probably also in combination with
-# port="6697"
-tls="True"
+# port=6697
+tls=true
 # ipv6
 # Force the IRC connection over IPv6. I'm not entirely sure what the underlying
 # framework does with this, so maybe it falls back intelligently?
-ipv6="True"
+ipv6=true
 # send_to
 # The nick (or channel) to which to send messages
 send_to="#test"
 # repeat_with
 # Repeat the message with these strings (usually channels, although you could
-# get creative with it...).  Separate items with a comma. To disable this
-# behavior and just send one message, comment out this key.
-;repeat_with="#channel,#channel2,#channel3"
+# get creative with it...).  To disable this behavior and just send one message,
+# comment out this key.
+#repeat_with=["#channel1", "#channel2", "#channel3"]
 # message
 # The message to send. The group {marker} will be replaced with the marker text.
 # The group {special} will be replaced with a special indicator, if the marker
@@ -132,7 +132,7 @@ send_to="#test"
 message="Now Playing{special}: {marker}"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default True
-;delayed = "True"
+#delayed = true
 
 #
 # plugin:AudacityLabels: Configure the Audacity Labels plugin
@@ -147,7 +147,7 @@ message="Now Playing{special}: {marker}"
 path="$HOME/Desktop/{show}-{count}.txt"
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = "False"
+#delayed = false
 
 #
 # plugin:HttpPusher: Configure the HTTP Pusher plugin
@@ -155,7 +155,7 @@ path="$HOME/Desktop/{show}-{count}.txt"
 ["plugin:HttpPusher"]
 # delayed
 # Delay this plugin's output by the broadcast delay from above? Default False
-;delayed = "False"
+#delayed = false
 
 # One of the webhooks for the HTTP Pusher plugin to send a request to.
 # Make more by copying this section and changing "example" in the section header to the
@@ -190,7 +190,7 @@ show_slug_param = "slug"
 show_episode_param = "episode"
 # extra_delay
 # Add more delay before sending markers to this webhook.  Positive delays only.
-extra_delay = "8.0"
+extra_delay = 8.0
 
 #
 # plugin:SomaFM: Configure the SomaFM plugin
@@ -207,7 +207,7 @@ source_name = "from Groove Salad on Soma.FM"
 # extra_delay
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from Soma.FM to you.
-extra_delay = "1"
+extra_delay = 1.0
 # marker_prefix
 # Prepend a string to the track before it gets sent out.  Useful for indicating
 # some additional information to listeners.  This value must be quoted with
@@ -216,7 +216,7 @@ marker_prefix = "\"(Pre-Show) \""
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
-start_disabled = "True"
+start_disabled = true
 
 #
 # plugin:OneEightyOneFM: Configure the 181.FM plugin
@@ -233,7 +233,7 @@ source_name = "from The Eagle at 181.FM"
 # extra_delay
 # A floating-point number of seconds to delay announcements for.  Useful for
 # compensating for streaming delays from 181.FM to you.
-extra_delay = "1"
+extra_delay = 1.0
 # marker_prefix
 # Prepend a string to the track before it gets sent out.  Useful for indicating
 # some additional information to listeners.  This value must be quoted with
@@ -242,4 +242,4 @@ marker_prefix = "\"(Pre-Show) \""
 # start_disabled
 # Prevent this plugin from immediately announcing its markers when the program
 # starts.
-start_disabled = "True"
+start_disabled = true
