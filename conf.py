@@ -24,9 +24,9 @@ copyright = "2019, s0ph0s"
 author = "s0ph0s"
 
 # The short X.Y version
-version = "4.0"
+version = "5.0"
 # The full version, including alpha/beta/rc tags
-release = "v5.0.0"
+release = "v5.0.1"
 
 
 # -- General configuration ---------------------------------------------------
