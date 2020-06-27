@@ -117,17 +117,7 @@ class IMarkerSource(Thread, IPlugin):
     def __init__(self, config, mediator: IMediator, show: str):
         """Create a new marker source."""
         super().__init__()
-        if type(config) is ConfigParser:
-            if self.PLUGIN_MODULE_NAME is None:
-                raise ValueError("Plugins must define PLUGIN_MODULE_NAME.")
-            self.config = config["plugin:" + self.PLUGIN_MODULE_NAME]
-        elif type(config) is SectionProxy:
-            self.config = config
-        else:
-            raise ValueError(
-                "config must either be a ConfigParser object or "
-                "a SectionProxy object."
-            )
+        self.config = config
         self.mediator = mediator
         self.should_terminate = False
         self.show = show
@@ -189,17 +179,7 @@ class IMarkerSink(Thread, IPlugin):  # noqa: F811
         :mediator: The IMediator to get markers from
         :show: The short name of the show that the markers are for"""
         super().__init__()
-        if type(config) is ConfigParser:
-            if self.PLUGIN_MODULE_NAME is None:
-                raise ValueError("Plugins must define PLUGIN_MODULE_NAME.")
-            self.config = config["plugin:" + self.PLUGIN_MODULE_NAME]
-        elif type(config) is SectionProxy:
-            self.config = config
-        else:
-            raise ValueError(
-                "config must either be a ConfigParser object or "
-                "a SectionProxy object."
-            )
+        self.config = config
         self.mediator = mediator
         self.show = show
         self.should_terminate = False

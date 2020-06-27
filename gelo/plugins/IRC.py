@@ -19,7 +19,7 @@ class IRC(gelo.arch.IMarkerSink):
         self.validate_config()
         self.log.debug("Configuration validated")
         self.nick = self.config["nick"]
-        if self.config["nickserv_pass"] != "":
+        if "nickserv_pass" in self.config:
             self.log.debug("Enabling NickServ authentication")
             self.nickserv_enable = True
             self.nickserv_pass = self.config["nickserv_pass"]
@@ -27,17 +27,16 @@ class IRC(gelo.arch.IMarkerSink):
             self.log.debug("Disabling NickServ authentication")
             self.nickserv_enable = False
         self.server = self.config["server"]
-        self.port = int(self.config["port"])
-        self.tls = gelo.conf.as_bool(self.config["tls"])
-        self.ipv6 = gelo.conf.as_bool(self.config["ipv6"])
+        self.port = self.config["port"]
+        self.tls = self.config["tls"]
+        self.ipv6 = self.config["ipv6"]
         self.send_to = self.config["send_to"]
-        self.repeat_with = (
-            self.config["repeat_with"].split(",")
-            if "repeat_with" in self.config.keys()
-            else None
-        )
+        if "repeat_with" in self.config:
+            self.repeat_with = self.config["repeat_with"]
+        else:
+            self.repeat_with = None
         self.message = self.config["message"]
-        self.delayed = gelo.conf.as_bool(self.config["delayed"])
+        self.delayed = self.config["delayed"]
         self.channel = self.mediator.subscribe(
             [gelo.arch.MarkerType.TRACK], IRC.__name__, delayed=self.delayed
         )
@@ -145,35 +144,30 @@ class IRC(gelo.arch.IMarkerSink):
         errors = []
         if "nick" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "nick"')
-        if "nickserv_pass" not in self.config.keys():
-            errors.append("[plugin:irc] is missing the required key " '"nickserv_pass"')
         if "server" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "server"')
         if "port" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "port"')
         else:
-            if not gelo.conf.is_int(self.config["port"]):
-                errors.append(
-                    "[plugin:irc] has a non-numeric value for" 'the key "port"'
-                )
+            if type(self.config["port"]) is not int:
+                errors.append('[plugin:irc] has a non-numeric value for the key "port"')
             else:
-                if int(self.config["port"]) >= 65536:
+                if self.config["port"] >= 65536:
                     errors.append(
-                        "[plugin:irc] has a value greater than"
-                        ' 65535 for the key "port", which is not'
-                        " supported by TCP"
+                        '[plugin:irc] has a value greater than 65535 for the key "port"'
+                        ", which is not supported by TCP"
                     )
         if "tls" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "tls"')
         else:
-            if not gelo.conf.is_bool(self.config["tls"]):
+            if type(self.config["tls"]) is not bool:
                 errors.append(
                     "[plugin:irc] must have a boolean value for the " 'key "tls"'
                 )
         if "ipv6" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "ipv6"')
         else:
-            if not gelo.conf.is_bool(self.config["ipv6"]):
+            if type(self.config["ipv6"]) is not bool:
                 errors.append(
                     "[plugin:irc] must have a boolean value for the " 'key "tls"'
                 )
@@ -183,10 +177,24 @@ class IRC(gelo.arch.IMarkerSink):
             errors.append('[plugin:irc] is missing the required key "message"')
         if "delayed" not in self.config.keys():
             self.config["delayed"] = "True"
-        else:
-            if not gelo.conf.is_bool(self.config["delayed"]):
+        if "repeat_with" in self.config.keys():
+            if type(self.config["repeat_with"]) is not list:
                 errors.append(
-                    "[plugin:irc] has a non-boolean value for the " 'key "delayed"'
+                    '[plugin:IRC] must have an array for the key "repeat_with"'
+                )
+            else:
+                for repeat_item in self.config["repeat_with"]:
+                    if type(repeat_item) is not str:
+                        errors.append(
+                            "[plugin:IRC] must have string values for "
+                            "every element of the array at the key "
+                            '"repeat_with". Ensure every element has quotes.'
+                        )
+                        break
+        else:
+            if type(self.config["delayed"]) is not bool:
+                errors.append(
+                    '[plugin:irc] has a non-boolean value for the key "delayed"'
                 )
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)

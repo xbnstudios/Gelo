@@ -28,9 +28,9 @@ class OneEightyOneFM(arch.IMarkerSource):
         self.config_test()
         self.url = self.config["stream_url"]
         self.source_name = self.config["source_name"]
-        self.extra_delay = float(self.config["extra_delay"])
+        self.extra_delay = self.config["extra_delay"]
         self.marker_prefix = self.config["marker_prefix"].strip('"')
-        self.is_enabled = not conf.as_bool(self.config["start_disabled"])
+        self.is_enabled = not self.config["start_disabled"]
 
     def run(self):
         """Run the code that receives and posts markers.
@@ -120,38 +120,36 @@ class OneEightyOneFM(arch.IMarkerSource):
         errors = []
         if "stream_url" not in self.config:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have the "
-                'required key "stream_url"'
+                "[plugin:OneEightyOneFM] does not have the " 'required key "stream_url"'
             )
         if "source_name" not in self.config:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have the "
-                'required key "stream_url"'
+                '[plugin:OneEightyOneFM] does not have the required key "stream_url"'
             )
         if "extra_delay" not in self.config:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have the "
+                "[plugin:OneEightyOneFM] does not have the "
                 'required key "extra_delay"'
             )
-        elif not conf.is_float(self.config["extra_delay"]):
+        elif type(self.config["extra_delay"]) is not float:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have a float "
+                "[plugin:OneEightyOneFM] does not have a float "
                 'value for the key "extra_delay"'
             )
         if "start_disabled" not in self.config:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have the "
+                "[plugin:OneEightyOneFM] does not have the "
                 'required key "start_disabled"'
             )
-        elif not conf.is_bool(self.config["start_disabled"]):
+        elif type(self.config["start_disabled"]) is not bool:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have a "
+                "[plugin:OneEightyOneFM] does not have a "
                 "boolean-parseable value for the key "
                 '"start_disabled"'
             )
         if "marker_prefix" not in self.config:
             errors.append(
-                "[plugin:one_eighty_one_fm] does not have the "
+                "[plugin:OneEightyOneFM] does not have the "
                 'required key "marker_prefix"'
             )
 

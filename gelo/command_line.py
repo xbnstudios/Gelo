@@ -3,7 +3,7 @@ import os
 from gelo import main, conf
 import signal
 import argparse
-import configparser
+import toml
 
 GELO = main.Gelo()
 
@@ -18,7 +18,7 @@ def main():
     parser.add_argument(
         "-c",
         "--config",
-        default=os.path.expandvars("$HOME/.config/gelo/gelo.ini"),
+        default=os.path.expandvars("$HOME/.config/gelo/gelo.toml"),
         type=open,
         help="path to configuration file",
     )
@@ -37,8 +37,7 @@ def main():
     )
     args = parser.parse_args()
     # Parse the configuration file
-    config_file = configparser.ConfigParser()
-    config_file.read_file(args.config)
+    config_file = toml.load(args.config)
     # Create the Gelo Configuration
     config = conf.Configuration(config_file, args)
     # Add the handler to shut down Gelo
