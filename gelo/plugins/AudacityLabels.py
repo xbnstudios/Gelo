@@ -19,7 +19,7 @@ class AudacityLabels(arch.IMarkerSink):
         self.collision_count = 0
         self.filename = self.avoid_overwrite_filename()
         self.log.info("Using %s as the data file path" % self.filename)
-        self.delayed = conf.as_bool(self.config["delayed"])
+        self.delayed = self.config["delayed"]
         self.channel = self.mediator.subscribe(
             [arch.MarkerType.TRACK], AudacityLabels.__name__, delayed=self.delayed
         )
@@ -102,16 +102,16 @@ class AudacityLabels(arch.IMarkerSink):
         errors = []
         if "path" not in self.config.keys():
             errors.append(
-                "[plugin:audacity_markers] is missing the required" ' key "path"'
+                '["plugin:AudacityLabels"] is missing the required key "path"'
             )
         else:
             self.config["path"] = os.path.expandvars(self.config["path"])
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = "False"
+            self.config["delayed"] = False
         else:
-            if not conf.is_bool(self.config["delayed"]):
+            if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    "[plugin:audacity_labels] has a non-boolean "
+                    '["plugin:AudacityLabels"] has a non-boolean '
                     'value for the key "delayed"'
                 )
         # Return errors, if any

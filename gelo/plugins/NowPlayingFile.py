@@ -12,7 +12,7 @@ class NowPlayingFile(arch.IMarkerSink):
         """Create a new NowPlayingFile marker sink."""
         super().__init__(config, med, show)
         self.validate_config()
-        self.delayed = conf.as_bool(self.config["delayed"])
+        self.delayed = self.config["delayed"]
         self.channel = self.mediator.subscribe(
             [arch.MarkerType.TRACK], NowPlayingFile.__name__, delayed=self.delayed
         )
@@ -39,16 +39,16 @@ class NowPlayingFile(arch.IMarkerSink):
         errors = []
         if "path" not in self.config.keys():
             errors.append(
-                "[plugin:now_playing_file] is missing the required" ' key "path"'
+                '["plugin:NowPlayingFile"] is missing the required key "path"'
             )
         else:
             self.config["path"] = os.path.expandvars(self.config["path"])
         if "delayed" not in self.config.keys():
             self.config["delayed"] = "False"
         else:
-            if not conf.is_bool(self.config["delayed"]):
+            if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    "[plugin:now_playing_file] has a non-boolean "
+                    '["plugin:NowPlayingFile"] has a non-boolean '
                     'value for the key "delayed"'
                 )
         # Return errors, if any

@@ -176,7 +176,12 @@ class IRC(gelo.arch.IMarkerSink):
         if "message" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "message"')
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = "True"
+            self.config["delayed"] = True
+        else:
+            if type(self.config["delayed"]) is not bool:
+                errors.append(
+                    '[plugin:irc] has a non-boolean value for the key "delayed"'
+                )
         if "repeat_with" in self.config.keys():
             if type(self.config["repeat_with"]) is not list:
                 errors.append(
@@ -191,10 +196,5 @@ class IRC(gelo.arch.IMarkerSink):
                             '"repeat_with". Ensure every element has quotes.'
                         )
                         break
-        else:
-            if type(self.config["delayed"]) is not bool:
-                errors.append(
-                    '[plugin:irc] has a non-boolean value for the key "delayed"'
-                )
         if len(errors) > 0:
             raise gelo.conf.InvalidConfigurationError(errors)

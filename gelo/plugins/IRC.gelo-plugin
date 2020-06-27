@@ -5,5 +5,5 @@ Module = IRC
 [Documentation]
 Description = Connect to an IRC server to send chapter marks.
 Author = s0ph0s
-Version = 3.0.0
+Version = 3.0.1
 Website = https://github.com/s0ph0s-2/Gelo
