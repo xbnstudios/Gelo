@@ -31,8 +31,8 @@ For more information about the design of the application, look in `doc/design`.
 ## Usage
 
 ```bash
-git clone https://github.com/s0ph0s-2/Gelo.git
-cd Gelo
+git clone https://github.com/xbnstudios/gelo.git
+cd gelo
 pip3 install .
 mkdir -p ~/.config/gelo
 cp gelo.ini.example ~/.config/gelo/gelo.ini
