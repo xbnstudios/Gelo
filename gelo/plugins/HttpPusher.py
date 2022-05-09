@@ -90,21 +90,28 @@ class HttpPusher(gelo.arch.IMarkerSink):
             payload[webhook_options["show_episode_param"]] = self.show_episode
 
         r = None
-        if webhook_options["method"] == "GET":
+        try:
+            if webhook_options["method"] == "GET":
+                self.log.warning(
+                    "[{}] Non-repeatable GET requests are bad...".format(webhook_name)
+                )
+                r = self.session.get(webhook_options["url"], params=payload)
+            elif webhook_options["method"] == "POST":
+                r = self.session.post(webhook_options["url"], data=payload)
+            if r is not None and r.status_code == 200:
+                self.log.info("Request to {} made successfully.".format(webhook_name))
+            elif r is not None:
+                self.log.info("Request to {} failed: {}".format(webhook_name, r.text))
+            else:
+                self.log.info(
+                    "Request to {} failed: response object was None (shouldn't happen)".format(
+                        webhook_name
+                    )
+                )
+        except requests.RequestException as re:
             self.log.warning(
-                "[{}] Non-repeatable GET requests are bad...".format(webhook_name)
-            )
-            r = self.session.get(webhook_options["url"], params=payload)
-        elif webhook_options["method"] == "POST":
-            r = self.session.post(webhook_options["url"], data=payload)
-        if r is not None and r.status_code == 200:
-            self.log.info("Request to {} made successfully.".format(webhook_name))
-        elif r is not None:
-            self.log.info("Request to {} failed: {}".format(webhook_name, r.text))
-        else:
-            self.log.info(
-                "Request to {} failed: response object was None (shouldn't happen)".format(
-                    webhook_name
+                "Exception encountered while trying to make a request to {}: {}".format(
+                    webhook_name, re
                 )
             )
 
