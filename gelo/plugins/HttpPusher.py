@@ -4,6 +4,7 @@ import gelo.mediator
 import queue
 import logging
 import requests
+from requests.adapters import HTTPAdapter, Retry
 from threading import Timer
 
 
@@ -11,6 +12,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
     """Push the marker to an HTTP endpoint."""
 
     PLUGIN_MODULE_NAME = "HttpPusher"
+    HTTP_TIMEOUT_SECS = 5
 
     def __init__(self, config, mediator: gelo.arch.IMediator, show: str):
         """Create a new HttpPusher."""
@@ -40,6 +42,17 @@ class HttpPusher(gelo.arch.IMarkerSink):
             [gelo.arch.MarkerType.TRACK], HttpPusher.__name__, delayed=self.delayed
         )
         self.session = requests.Session()
+        retries = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[500, 502, 503, 504, 429],
+            raise_on_status=True,
+            # False makes sure this retries for every method type, not just the
+            # "safe" ones.
+            method_whitelist=False,
+        )
+        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
     def run(self):
         """Run the code that will send HTTP requests with the markers."""
@@ -90,30 +103,42 @@ class HttpPusher(gelo.arch.IMarkerSink):
             payload[webhook_options["show_episode_param"]] = self.show_episode
 
         r = None
-        try:
-            if webhook_options["method"] == "GET":
-                self.log.warning(
-                    "[{}] Non-repeatable GET requests are bad...".format(webhook_name)
-                )
-                r = self.session.get(webhook_options["url"], params=payload)
-            elif webhook_options["method"] == "POST":
-                r = self.session.post(webhook_options["url"], data=payload)
-            if r is not None and r.status_code == 200:
-                self.log.info("Request to {} made successfully.".format(webhook_name))
-            elif r is not None:
-                self.log.info("Request to {} failed: {}".format(webhook_name, r.text))
-            else:
-                self.log.info(
-                    "Request to {} failed: response object was None (shouldn't happen)".format(
-                        webhook_name
+        attempts = 0
+        while attempts < 3:
+            attempts += 1
+            try:
+                if webhook_options["method"] == "GET":
+                    self.log.warning(
+                        "[{}] Non-repeatable GET requests are bad...".format(
+                            webhook_name
+                        )
                     )
+                    r = self.session.get(
+                        webhook_options["url"],
+                        params=payload,
+                        timeout=self.HTTP_TIMEOUT_SECS,
+                    )
+                elif webhook_options["method"] == "POST":
+                    r = self.session.post(
+                        webhook_options["url"],
+                        data=payload,
+                        timeout=self.HTTP_TIMEOUT_SECS,
+                    )
+                r.raise_for_status()
+                self.log.info("Request to {} made successfully.".format(webhook_name))
+                self.log.debug("Response data: {}".format(r.content))
+            except requests.ConnectionError as ce:
+                self.log.warning(
+                    "Connection Error while trying to make a request to"
+                    "{}, attempt {}: {}".format(webhook_name, attempts, ce)
                 )
-        except requests.RequestException as re:
-            self.log.warning(
-                "Exception encountered while trying to make a request to {}: {}".format(
-                    webhook_name, re
+                continue
+            except requests.RequestException as re:
+                self.log.warning(
+                    "Non-retryable exception encountered while trying to make a "
+                    "request to {}: {}".format(webhook_name, re)
                 )
-            )
+                break
 
     def validate_config(self):
         """Ensure the configuration file is valid."""
@@ -124,7 +149,8 @@ class HttpPusher(gelo.arch.IMarkerSink):
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    '["plugin:HttpPusher"] has a non-boolean value for the key "delayed"'
+                    '["plugin:HttpPusher"] has a non-boolean value for the key'
+                    '"delayed"'
                 )
         if "webhooks" not in self.config.keys():
             errors.append(
@@ -143,41 +169,47 @@ class HttpPusher(gelo.arch.IMarkerSink):
         errors = []
         if "url" not in webhook_options.keys():
             errors.append(
-                '["plugin:HttpPusher".webhooks.{}] is missing the required key "url"'.format(
-                    webhook_name
-                )
+                (
+                    '["plugin:HttpPusher".webhooks.{}] is missing the required '
+                    'key "url"'
+                ).format(webhook_name)
             )
         if "api_key_param" in webhook_options.keys():
             if "api_key" not in webhook_options.keys():
                 errors.append(
-                    '["plugin:HttpPusher".webhooks.{}] is missing the required key "api_key"'.format(
-                        webhook_name
-                    )
+                    (
+                        '["plugin:HttpPusher".webhooks.{}] is missing the '
+                        'required key "api_key"'
+                    ).format(webhook_name)
                 )
         if "method" not in webhook_options.keys():
             errors.append(
-                '["plugin:HttpPusher".webhooks.{}] is missing the required key "method"'.format(
-                    webhook_name
-                )
+                (
+                    '["plugin:HttpPusher".webhooks.{}] is missing the required '
+                    'key "method"'
+                ).format(webhook_name)
             )
         else:
             if webhook_options["method"] not in ["GET", "POST"]:
                 errors.append(
-                    '["plugin:HttpPusher".webhooks.{}] has an unsupported HTTP method listed for the key "method". Choose GET or POST.'.format(
-                        webhook_name
-                    )
+                    (
+                        '["plugin:HttpPusher".webhooks.{}] has an unsupported '
+                        'HTTP method listed for the key "method". Choose GET or POST.'
+                    ).format(webhook_name)
                 )
         if "marker_param" not in webhook_options.keys():
             errors.append(
-                '["plugin:HttpPusher".webhooks.{}] is missing the required key "marker_param"'.format(
-                    webhook_name
-                )
+                (
+                    '["plugin:HttpPusher".webhooks.{}] is missing the required '
+                    'key "marker_param"'
+                ).format(webhook_name)
             )
         if "extra_delay" in webhook_options.keys():
             if type(webhook_options["extra_delay"]) is not float:
                 errors.append(
-                    '["plugin:HttpPusher".webhooks.{}] has a non-float value for the key "extra_delay"'.format(
-                        webhook_name
-                    )
+                    (
+                        '["plugin:HttpPusher".webhooks.{}] has a non-float '
+                        'value for the key "extra_delay"'
+                    ).format(webhook_name)
                 )
         return errors
