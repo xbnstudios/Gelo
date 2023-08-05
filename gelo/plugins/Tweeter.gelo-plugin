@@ -1,10 +1,10 @@
 [Core]
 Name = Tweeter
 Module = Tweeter
-   
+
 [Documentation]
 Description = Tweet the marker.
 Author = s0ph0s
-Version = 3.0.0
+Version = 4.0.0
 Website = https://github.com/s0ph0s-2/Gelo
 

@@ -3,8 +3,7 @@ import gelo.conf
 import gelo.mediator
 import queue
 import logging
-import twitter
-import twitter.error
+import tweepy
 
 
 class Tweeter(gelo.arch.IMarkerSink):
@@ -22,7 +21,7 @@ class Tweeter(gelo.arch.IMarkerSink):
         self.channel = self.mediator.subscribe(
             [gelo.arch.MarkerType.TRACK], Tweeter.__name__, delayed=self.delayed
         )
-        self.api = self.get_api()
+        self.client = self.get_client()
 
     def run(self):
         """Run the code that will receive markers and tweet them."""
@@ -33,7 +32,8 @@ class Tweeter(gelo.arch.IMarkerSink):
                 if not self.is_enabled:
                     continue
                 self.log.debug("Received marker from channel: %s" % marker)
-                self.tweet(marker)
+                result = self.tweet(marker)
+                self.log.debug("Tweet result: %s" % result)
             except queue.Empty:
                 continue
             except gelo.mediator.UnsubscribeException:
@@ -41,33 +41,37 @@ class Tweeter(gelo.arch.IMarkerSink):
 
     def tweet(self, marker: gelo.arch.Marker):
         """Connect to Twitter and tweet the track."""
+        self.log.debug("wtf")
         special = (
             " ({special})".format(special=marker.special)
             if marker.special is not None
             else ""
         )
+        text = self.config["announce-string"].format(
+            marker=marker.label, special=special
+        )
+        self.log.debug('Attempting to tweet "%s"' % text)
         try:
-            return self.api.PostUpdate(
-                self.config["announce_string"].format(
-                    marker=marker.label, special=special
-                )
-            )
-        except twitter.error.TwitterError as e:
-            if type(e.message) is list:
-                if e.message[0]["code"] == 187:
+            return self.client.create_tweet(text=text)
+        except tweepy.errors.TweepyException as te:
+            if type(te) is tweepy.errors.Forbidden:
+                if type(te.api_messages) is str and "duplicate" in te.api_messages:
                     self.log.warning("Twitter rejected duplicate status. Ignoring.")
-            else:
-                if e.message["code"] == 187:
+                elif type(te.api_messages) is list and [
+                    message for message in te.api_messages if "duplicate" in message
+                ]:
                     self.log.warning("Twitter rejected duplicate status. Ignoring.")
                 else:
-                    raise e
+                    raise te
+            else:
+                raise te
 
-    def get_api(self):
-        """Get a Twitter API object from the python-twitter module."""
-        return twitter.Api(
+    def get_client(self):
+        """Get a Twitter Client object from the tweepy module."""
+        return tweepy.Client(
             consumer_key=self.config["consumer_key"],
             consumer_secret=self.config["consumer_secret"],
-            access_token_key=self.config["access_token_key"],
+            access_token=self.config["access_token_key"],
             access_token_secret=self.config["access_token_secret"],
         )
 

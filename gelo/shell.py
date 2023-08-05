@@ -282,7 +282,7 @@ class GeloShell(cmd.Cmd):
         if " " in arg:
             print("gelo: undefine: spaces not permitted in macro name")
             return False
-        del (self.macros["macros"][arg])
+        del self.macros["macros"][arg]
 
     def complete_undefine(self, text, *ignored):
         return [

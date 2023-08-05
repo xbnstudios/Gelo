@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from gelo import main, conf
+from . import main, conf
 import signal
 import argparse
 import toml
