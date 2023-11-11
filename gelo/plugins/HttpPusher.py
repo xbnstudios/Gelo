@@ -118,6 +118,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
                         params=payload,
                         timeout=self.HTTP_TIMEOUT_SECS,
                     )
+                    break
                 elif webhook_options["method"] == "POST":
                     r = self.session.post(
                         webhook_options["url"],
@@ -127,6 +128,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
                 r.raise_for_status()
                 self.log.info("Request to {} made successfully.".format(webhook_name))
                 self.log.debug("Response data: {}".format(r.content))
+                break
             except requests.ConnectionError as ce:
                 self.log.warning(
                     "Connection Error while trying to make a request to"
