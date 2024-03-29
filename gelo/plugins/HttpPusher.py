@@ -49,7 +49,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
             raise_on_status=True,
             # False makes sure this retries for every method type, not just the
             # "safe" ones.
-            method_whitelist=False,
+            allowed_methods=False,
         )
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
