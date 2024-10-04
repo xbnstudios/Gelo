@@ -13,13 +13,13 @@ class TestMediator(IMediator):
         """Create the Mediator."""
         super().__init__()
         self.q = Queue()
-        self.q.put(Marker('ABBA - Money Money Money', 0.0))
-        self.q.put(Marker('John Travolta - Summer Lovin', 2.01))
-        self.q.put(Marker('Imperial Leisure - Man On The Street', 3.84))
-        self.q.put(Marker('Zammuto - Need Some Sun', 6.23))
-        self.q.put(Marker('3typen - Pretty Little Thing', 7.98))
-        self.q.put(Marker('The Darkness - Forbidden Love', 9.59))
-        self.q.put(Marker('Justice - Fire', 13.01))
+        self.q.put(Marker("ABBA - Money Money Money", 0.0))
+        self.q.put(Marker("John Travolta - Summer Lovin", 2.01))
+        self.q.put(Marker("Imperial Leisure - Man On The Street", 3.84))
+        self.q.put(Marker("Zammuto - Need Some Sun", 6.23))
+        self.q.put(Marker("3typen - Pretty Little Thing", 7.98))
+        self.q.put(Marker("The Darkness - Forbidden Love", 9.59))
+        self.q.put(Marker("Justice - Fire", 13.01))
         self.q.listen = partial(self.listen, self.q)
 
     def subscribe(self, event_types: list):
@@ -35,10 +35,10 @@ class TestMediator(IMediator):
 def main():
     """Run the main test driver"""
     c = ConfigParser()
-    c['DEFAULT']['path'] = '$HOME/Desktop/{show}.csv'
+    c["DEFAULT"]["path"] = "$HOME/Desktop/{show}.csv"
     tm = TestMediator()
 
-    al = AudacityLabels(c['DEFAULT'], tm, 'fnt-200')
+    al = AudacityLabels(c["DEFAULT"], tm, "fnt-200")
     al.start()
     sleep(20)
     al.exit()

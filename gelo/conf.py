@@ -1,4 +1,3 @@
-import configparser
 import argparse
 import os
 
@@ -7,9 +6,7 @@ class Configuration(object):
     """A configuration for Gelo.
     I split this out to reduce coupling between Gelo and ConfigParser."""
 
-    def __init__(
-        self, config_file: dict, args: argparse.Namespace
-    ):
+    def __init__(self, config_file: dict, args: argparse.Namespace):
         """Create a Configuration."""
         self.validate_config_file(config_file)
         self.user_plugin_dir = ""

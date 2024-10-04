@@ -90,7 +90,7 @@ class SomaFM(arch.IMarkerSource):
         :returns: A string of the next track, or ``None`` if it hasn't
         changed yet.
         """
-        ignored = self.http_resp.read(self.metadata_interval)
+        _ = self.http_resp.read(self.metadata_interval)
         size_byte = ord(self.http_resp.read(1))
         metadata_size = size_byte * 16
         self.log.debug("reading " + str(metadata_size) + " bytes of metadata")

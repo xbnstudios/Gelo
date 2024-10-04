@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """A podcast chapter metadata gathering tool"""
+
 import os
 import logging
 from time import time
@@ -11,8 +12,7 @@ BUILTIN_PLUGIN_DIR = os.path.join(os.path.dirname(__file__), "plugins")
 
 
 class GeloPluginManager(PluginManager.PluginManager):
-    """Load Gelo plugins (just override the method that instantiates plugins).
-    """
+    """Load Gelo plugins (just override the method that instantiates plugins)."""
 
     def __init__(self, plugin_locator=None):
         """Create the PluginManager for Gelo."""

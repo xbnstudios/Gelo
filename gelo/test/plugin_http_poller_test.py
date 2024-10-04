@@ -12,11 +12,11 @@ class TestMediator(IMediator):
 
 def main():
     config = ConfigParser()
-    config['DEFAULT']['poll_url'] = 'http://localhost:8080/nowplaying.xsl'
-    config['DEFAULT']['prefix_file'] = '/tmp/prefix.txt'
+    config["DEFAULT"]["poll_url"] = "http://localhost:8080/nowplaying.xsl"
+    config["DEFAULT"]["prefix_file"] = "/tmp/prefix.txt"
 
     tm = TestMediator()
-    plugin = HttpPoller(config['DEFAULT'], tm, 'fnt-200')
+    plugin = HttpPoller(config["DEFAULT"], tm, "fnt-200")
     plugin.start()
 
 

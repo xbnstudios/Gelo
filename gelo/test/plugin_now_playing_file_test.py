@@ -13,13 +13,13 @@ class TestMediator(IMediator):
         """Create the Mediator."""
         super().__init__()
         self.q = Queue()
-        self.q.put('ABBA - Money Money Money')
-        self.q.put('John Travolta - Summer Lovin')
-        self.q.put('Imperial Leisure - Man On The Street')
-        self.q.put('Zammuto - Need Some Sun')
-        self.q.put('3typen - Pretty Little Thing')
-        self.q.put('The Darkness - Forbidden Love')
-        self.q.put('Justice - Fire')
+        self.q.put("ABBA - Money Money Money")
+        self.q.put("John Travolta - Summer Lovin")
+        self.q.put("Imperial Leisure - Man On The Street")
+        self.q.put("Zammuto - Need Some Sun")
+        self.q.put("3typen - Pretty Little Thing")
+        self.q.put("The Darkness - Forbidden Love")
+        self.q.put("Justice - Fire")
         self.q.listen = partial(self.listen, self.q)
 
     def subscribe(self, event_types: list):
@@ -35,10 +35,10 @@ class TestMediator(IMediator):
 def main():
     """Run the main test driver"""
     c = ConfigParser()
-    c['DEFAULT']['path'] = '$HOME/Desktop/test.txt'
+    c["DEFAULT"]["path"] = "$HOME/Desktop/test.txt"
     tm = TestMediator()
 
-    npf = NowPlayingFile(c['DEFAULT'], tm)
+    npf = NowPlayingFile(c["DEFAULT"], tm)
     npf.start()
 
 

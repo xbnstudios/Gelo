@@ -4,11 +4,11 @@
 This module includes the interfaces, enums, and value objects that are used
 throughout the application.
 """
+
 from enum import Enum
 from typing import List
 from threading import Thread
 from yapsy.IPlugin import IPlugin
-from configparser import ConfigParser, SectionProxy
 
 
 class MarkerType(Enum):
@@ -83,8 +83,7 @@ class IMarkerSink(Thread, IPlugin):
 
 
 class IMediator(object):
-    """A middle layer that accepts events from sources and sends them to sinks.
-    """
+    """A middle layer that accepts events from sources and sends them to sinks."""
 
     def __init__(self):
         """Create a new mediator."""

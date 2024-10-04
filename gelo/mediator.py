@@ -68,10 +68,10 @@ class Mediator(gelo.arch.IMediator):
         self, marker_type: gelo.arch.MarkerType, marker: gelo.arch.Marker
     ) -> None:
         """Publish markers to delayed subscribers.
-        
-        This is designed to be called by a threading.Timer, so that the 
+
+        This is designed to be called by a threading.Timer, so that the
         actual marker output occurs somewhat in-line with the actual broadcast.
-        
+
         :param marker_type: The EventType corresponding to this marker.
         :param marker: The Marker to publish.
         """
