@@ -1,13 +1,11 @@
 [project]
 name = "gelo"
-version = "5.0.4"
+version = "6.0.0"
 description = "podcast chapter metadata gathering tool for podcast creators"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-  "yapsy>=1.12",
   "requests",
-  "python-twitter",
   "irc",
   "toml"
 ]
