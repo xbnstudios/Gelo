@@ -86,13 +86,18 @@ class HttpPusher(gelo.arch.IMarkerSink):
                 self.log.debug("Sending marker for {} immediately…".format(name))
                 self.request(marker, name, options)
 
-    def request(
-        self, marker: gelo.arch.Marker, webhook_name: str, webhook_options: dict
-    ):
-        """Make one single HTTP request."""
-        # Populate the payload object. Requests will turn this into form values for
+    def make_payload(self, webhook_options, marker) -> dict[str, str]:
+        payload = {}
+        if "marker_param" in webhook_options:
+            payload[webhook_options["marker_param"]] = marker.label
+        else:
+            if marker.artist and marker.title:
+                payload[webhook_options["artist_param"]] = marker.artist
+                payload[webhook_options["title_param"]] = marker.title
+            else:
+                payload[webhook_options["artist_param"]] = ""
+                payload[webhook_options["title_param"]] = marker.label
         # POST and URL parameters for GET.
-        payload = {webhook_options["marker_param"]: marker.label}
         # All of these are optional config keys.
         if "api_key_param" in webhook_options:
             # The config validator function checks to ensure api_key is present.
@@ -101,6 +106,13 @@ class HttpPusher(gelo.arch.IMarkerSink):
             payload[webhook_options["show_slug_param"]] = self.show_slug
         if "show_episode_param" in webhook_options:
             payload[webhook_options["show_episode_param"]] = self.show_episode
+        return payload
+
+    def request(
+        self, marker: gelo.arch.Marker, webhook_name: str, webhook_options: dict
+    ):
+        """Make one single HTTP request."""
+        payload = self.make_payload(webhook_options, marker)
 
         r = None
         attempts = 0
@@ -151,8 +163,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(
-                    '["plugin:HttpPusher"] has a non-boolean value for the key'
-                    '"delayed"'
+                    '["plugin:HttpPusher"] has a non-boolean value for the key"delayed"'
                 )
         if "webhooks" not in self.config.keys():
             errors.append(
@@ -199,11 +210,13 @@ class HttpPusher(gelo.arch.IMarkerSink):
                         'HTTP method listed for the key "method". Choose GET or POST.'
                     ).format(webhook_name)
                 )
-        if "marker_param" not in webhook_options.keys():
+        if ("marker_param" not in webhook_options.keys()) == (
+            "artist_param" not in webhook_options.keys()
+            or "title_param" not in webhook_options.keys()
+        ):
             errors.append(
                 (
-                    '["plugin:HttpPusher".webhooks.{}] is missing the required '
-                    'key "marker_param"'
+                    '["plugin:HttpPusher".webhooks.{}] must have ONLY "marker_param" OR BOTH OF "artist_param" and "title_param"'
                 ).format(webhook_name)
             )
         if "extra_delay" in webhook_options.keys():

@@ -1,8 +1,20 @@
 import re
 import requests
 import requests.exceptions
+from typing import Optional
+from typing import Tuple
 from gelo import arch, conf
 from time import time, sleep
+
+artist_track_matcher = re.compile(r"^(.+) — (.+)$")
+
+
+def match_artist_track(text: str) -> Optional[Tuple[str, str]]:
+    m = artist_track_matcher.match(text)
+    if m:
+        return m.group(1, 2)
+    else:
+        return None
 
 
 class HttpPoller(arch.IMarkerSource):
@@ -34,7 +46,11 @@ class HttpPoller(arch.IMarkerSource):
                 continue
             if track == self.last_marker or track.strip() == "":
                 continue
-            m = arch.Marker(track)
+            artist_track = self.match_artist_track(track)
+            if artist_track:
+                m = arch.Marker(track, artist_track[0], artist_track[1])
+            else:
+                m = arch.Marker(track)
             m.special = self.check_prefix_file()
             self.mediator.publish(arch.MarkerType.TRACK, m)
             self.last_marker = track
@@ -63,12 +79,10 @@ class HttpPoller(arch.IMarkerSource):
         """
         errors = []
         if "poll_url" not in self.config:
-            errors.append(
-                "[plugin:icecast] does not have the required key" ' "poll_url"'
-            )
+            errors.append('[plugin:icecast] does not have the required key "poll_url"')
         if "prefix_file" not in self.config:
             errors.append(
-                "[plugin:icecast] does not have the required key" ' "prefix_file"'
+                '[plugin:icecast] does not have the required key "prefix_file"'
             )
         # Throw exception if necessary.
         if len(errors) > 0:

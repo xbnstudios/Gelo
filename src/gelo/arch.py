@@ -6,7 +6,6 @@ throughout the application.
 """
 
 from enum import Enum
-from typing import List
 from threading import Thread
 
 
@@ -45,7 +44,7 @@ class MarkerType(Enum):
 
 
 # A type for a list of MarkerType
-MarkerTypeList = List[MarkerType]
+MarkerTypeList = [MarkerType]
 
 
 class Marker(object):
@@ -53,25 +52,29 @@ class Marker(object):
 
     The time is a float number of seconds since the first marker."""
 
-    def __init__(self, label: str):
+    def __init__(self, label: str, artist: str | None = None, title: str | None = None):
         """Create a new marker."""
         self.label = label
+        self.artist = artist
+        self.title = title
         self.time = None
         self.url = None
         self.special = None
 
     def __repr__(self):
-        return "Marker(%s, %s, %s, %s)" % (
+        return "Marker(%s, %s, %s,  %s, %s, %s)" % (
             self.label,
+            self.artist,
+            self.track,
             self.time,
             self.special,
             self.url,
         )
 
     @classmethod
-    def withtime(cls, label: str, time: float):
+    def withtime(cls, label: str, time: float, **kwargs):
         """Create a marker with a time."""
-        m = cls(label)
+        m = cls(label, **kwargs)
         m.time = time
         return m
 
