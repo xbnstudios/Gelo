@@ -1,5 +1,5 @@
 from gelo.arch import IMediator, MarkerType, Marker
-from gelo.plugins.http_poller import HttpPoller
+from gelo.plugins.HttpPoller import HttpPoller
 from configparser import ConfigParser
 
 

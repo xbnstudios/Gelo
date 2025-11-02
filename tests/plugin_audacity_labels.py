@@ -1,7 +1,7 @@
 from time import sleep
 from functools import partial
 from queue import Queue
-from gelo.plugins.audacity_labels import AudacityLabels
+from gelo.plugins.AudacityLabels import AudacityLabels
 from gelo.arch import IMediator, Marker
 from configparser import ConfigParser
 

@@ -1,7 +1,7 @@
 from time import sleep
 from functools import partial
 from queue import Queue
-from gelo.plugins.now_playing_file import NowPlayingFile
+from gelo.plugins.NowPlayingFile import NowPlayingFile
 from gelo.arch import IMediator
 from configparser import ConfigParser
 

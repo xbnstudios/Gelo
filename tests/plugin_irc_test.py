@@ -1,5 +1,5 @@
 import gelo.arch
-import gelo.plugins.irc
+import gelo.plugins.IRC
 from time import sleep
 from queue import Queue
 from functools import partial
