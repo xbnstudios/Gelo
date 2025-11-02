@@ -33,50 +33,6 @@ poll_url="http://localhost:8080/nowplaying.xsl"
 prefix_file = "/tmp/prefix.txt"
 
 #
-# plugin:Tweeter: Configure the Twitter plugin
-#
-["plugin:Tweeter"]
-########
-# NOTE #
-########
-# These next four keys are commented out.  If you run `gelo-twitter-register`,
-# the application will walk you through the process of setting them up with a
-# command-line wizard.  If you've done this sort of thing before, feel free to
-# set them yourself --- the wizard is not required!
-# Also note that due to limiations of Python's ConfigParser, running the wizard
-# will eat all of the comments in this file.  If you want to keep them, make a
-# copy of the config first, then copy the configured changes from the wizard
-# into the duplicate you just made.
-
-# consumer_key
-# The Twitter API key for this application, found under Keys and Access Tokens
-# on the Twitter Application Management page (apps.twitter.com)
-#consumer_key =""
-# consumer_secret
-# The Twitter API secret for this application, found under Keys and Access
-# Tokens on the Twitter Application Management page (apps.twitter.com)
-#consumer_secret =""
-# access_token_key
-# The Twitter API access token to allow this app to tweet using your account,
-# found under Keys and Access Tokens on the Twitter Application Management page
-# (apps.twitter.com).
-#access_token_key =""
-# access_token_secret
-# The Twitter API access token secret to allow this app to tweet using your
-# account, found under Keys and Access Tokens on the Twitter Application
-# Management page (apps.twitter.com).
-#access_token_secret =""
-
-# announce_string
-# The string that will be tweeted. "{marker}" will be substituted for the text
-# sent by the marker source.  "{special}" will be substituted for " (...)",
-# where the ellipsis is any special status attached to the marker.
-announce_string="Now Playing{special}: {marker}"
-# delayed
-# Delay this plugin's output by the broadcast delay from above? Default True
-#delayed = true
-
-#
 # plugin:NowPlayingFile: A text file that contains a single line with the
 # current marker data
 #
@@ -191,6 +147,17 @@ show_episode_param = "episode"
 # extra_delay
 # Add more delay before sending markers to this webhook.  Positive delays only.
 extra_delay = 8.0
+
+# Alternative webhook settings for separate artist/title parameters.
+["plugin:HttpPusher".webhooks.example2]
+url = "https://example.com/v2/now_playing"
+method = "POST"
+# artist_param
+# The argument name where the endpoint expects to find the artist name.
+artist_param = "artist"
+# title_param
+# The argument name where the endpoint expects to find the track title.
+title_param = "title"
 
 #
 # plugin:SomaFM: Configure the SomaFM plugin
