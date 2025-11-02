@@ -7,24 +7,23 @@ import http.client
 from gelo import arch, conf
 
 
-class OneEightyOneFM(arch.IMarkerSource):
-    """Connect to a 181.FM stream and announce their markers."""
+class SomaFM(arch.IMarkerSource):
+    """Connect to a Soma.FM stream and announce their markers."""
 
-    PLUGIN_MODULE_NAME = "OneEightyOneFM"
+    PLUGIN_MODULE_NAME = "SomaFM"
     HEADERS = {
         "Icy-MetaData": "1",
-        "User-Agent": "gelo/3.2, one_eighty_one_fm/1.0: "
-        "https://github.com/s0ph0s-2/gelo",
+        "User-Agent": "gelo/3.2, somafm/1.0: https://github.com/s0ph0s-2/gelo",
     }
 
     def __init__(self, config, mediator: arch.IMediator, show: str):
-        """Create a new instance of OneEightyOneFM."""
+        """Create a new instance of SomaFm."""
         super().__init__(config, mediator, show)
         self.last_track = ""
         self.http_client = None
         self.http_resp = None
         self.metadata_interval = 0
-        self.log = logging.getLogger("gelo.plugins.one_eighty_one_fm")
+        self.log = logging.getLogger("gelo.plugins.somafm")
         self.config_test()
         self.url = self.config["stream_url"]
         self.source_name = self.config["source_name"]
@@ -74,7 +73,7 @@ class OneEightyOneFM(arch.IMarkerSource):
         self.http_resp = self.http_client.getresponse()
         if self.http_resp is None:
             self.log.warning(
-                "HTTP response was None. Is the stream " "configured properly?"
+                "HTTP response was None. Is the stream configured properly?"
             )
             self.should_terminate = True
         self.metadata_interval = int(self.http_resp.getheader("Icy-MetaInt"))
@@ -100,7 +99,7 @@ class OneEightyOneFM(arch.IMarkerSource):
         if metadata == "":
             self.log.debug("metadata was empty; return None")
             return None
-        track_matcher = re.search("StreamTitle='(.*?)';(\S|$)", metadata)
+        track_matcher = re.search(r"StreamTitle='(.*?)';(\S|$)", metadata)
         if track_matcher is None:
             self.log.debug("metadata didn't contain StreamTitle; return None")
             return None
@@ -119,38 +118,29 @@ class OneEightyOneFM(arch.IMarkerSource):
         """Verify this plugin's configuration."""
         errors = []
         if "stream_url" not in self.config:
-            errors.append(
-                "[plugin:OneEightyOneFM] does not have the " 'required key "stream_url"'
-            )
+            errors.append('[plugin:SomaFM] does not have the required key "stream_url"')
         if "source_name" not in self.config:
-            errors.append(
-                '[plugin:OneEightyOneFM] does not have the required key "stream_url"'
-            )
+            errors.append('[plugin:SomaFM] does not have the required key "stream_url"')
         if "extra_delay" not in self.config:
             errors.append(
-                "[plugin:OneEightyOneFM] does not have the "
-                'required key "extra_delay"'
+                '[plugin:SomaFM] does not have the required key "extra_delay"'
             )
         elif type(self.config["extra_delay"]) is not float:
             errors.append(
-                "[plugin:OneEightyOneFM] does not have a float "
-                'value for the key "extra_delay"'
+                '[plugin:SomaFM] does not have a float value for the key "extra_delay"'
             )
         if "start_disabled" not in self.config:
             errors.append(
-                "[plugin:OneEightyOneFM] does not have the "
-                'required key "start_disabled"'
+                '[plugin:SomaFM] does not have the required key "start_disabled"'
             )
         elif type(self.config["start_disabled"]) is not bool:
             errors.append(
-                "[plugin:OneEightyOneFM] does not have a "
-                "boolean-parseable value for the key "
-                '"start_disabled"'
+                "[plugin:SomaFM] does not have a boolean"
+                'value for the key "start_disabled"'
             )
         if "marker_prefix" not in self.config:
             errors.append(
-                "[plugin:OneEightyOneFM] does not have the "
-                'required key "marker_prefix"'
+                '[plugin:SomaFM] does not have the required key "marker_prefix"'
             )
 
         if len(errors) > 0:

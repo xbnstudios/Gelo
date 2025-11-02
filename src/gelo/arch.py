@@ -8,7 +8,6 @@ throughout the application.
 from enum import Enum
 from typing import List
 from threading import Thread
-from yapsy.IPlugin import IPlugin
 
 
 class MarkerType(Enum):
@@ -78,7 +77,7 @@ class Marker(object):
 
 
 # This class is defined here only so that the type hints work.
-class IMarkerSink(Thread, IPlugin):
+class IMarkerSink(Thread):
     pass
 
 
@@ -108,7 +107,7 @@ class IMediator(object):
         pass
 
 
-class IMarkerSource(Thread, IPlugin):
+class IMarkerSource(Thread):
     """An interface defining the required methods of a marker source."""
 
     PLUGIN_MODULE_NAME = None
@@ -167,7 +166,7 @@ class IMarkerSource(Thread, IPlugin):
         self.should_terminate = True
 
 
-class IMarkerSink(Thread, IPlugin):  # noqa: F811
+class IMarkerSink(Thread):  # noqa: F811
     """An interface defining the required methods of a marker sink."""
 
     PLUGIN_MODULE_NAME = None

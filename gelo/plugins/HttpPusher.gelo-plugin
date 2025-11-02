@@ -1,9 +1,0 @@
-[Core]
-Name = HttpPusher
-Module = HttpPusher
-
-[Documentation]
-Description = Connect to one or more HTTP(S) endpoints to send marker data
-Author = s0ph0s
-Version = 2.0.4
-Website = https://github.com/s0ph0s-2/Gelo

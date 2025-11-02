@@ -217,7 +217,7 @@ class GeloShell(cmd.Cmd):
         if plugin is None:
             print('gelo: enable: nonexistent plugin "%s"' % arg)
             return False
-        if plugin.plugin_object.is_enabled:
+        if plugin.is_enabled:
             return False
         self.plugin_manager.enablePluginByName(arg)
         self.log.info("Plugin enabled: %s" % arg)
@@ -239,7 +239,7 @@ class GeloShell(cmd.Cmd):
         if plugin is None:
             print('gelo: disable: nonexistent plugin "%s"' % arg)
             return False
-        if not plugin.plugin_object.is_enabled:
+        if not plugin.is_enabled:
             return False
         self.plugin_manager.disablePluginByName(arg)
         self.log.info("Plugin disabled: %s" % arg)
@@ -306,7 +306,7 @@ class GeloShell(cmd.Cmd):
         if arg == "plugins" or arg == "":
             print("Plugins:")
             for plugin in self.plugin_manager.getAllPlugins():
-                print("\t" + plugin.name)
+                print("\t" + plugin.PLUGIN_MODULE_NAME)
 
     def complete_list(self, text, *ignored):
         opts = ["macros", "plugins"]

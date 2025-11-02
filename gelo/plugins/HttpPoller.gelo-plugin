@@ -1,9 +1,0 @@
-[Core]
-Name = HttpPoller
-Module = HttpPoller
-
-[Documentation]
-Description = Poll an HTTP server for marker data every 0.25 seconds.
-Author = s0ph0s
-Version = 2.1.0
-Website = https://github.com/s0ph0s-2/Gelo
