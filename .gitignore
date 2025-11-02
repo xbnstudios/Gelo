@@ -105,3 +105,4 @@ venv.bak/
 .mypy_cache/
 /gelo.vims
 /.idea
+.DS_Store
