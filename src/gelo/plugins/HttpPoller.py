@@ -4,19 +4,8 @@ import requests
 import dataclasses
 import requests.exceptions
 from typing import Optional
-from typing import Tuple
 from gelo import arch, conf
 from time import time, sleep
-
-artist_track_matcher = re.compile(r"^(.+) — (.+)$")
-
-
-def match_artist_track(text: str) -> Optional[Tuple[str, str]]:
-    m = artist_track_matcher.match(text)
-    if m:
-        return m.group(1, 2)
-    else:
-        return None
 
 
 @dataclasses.dataclass
