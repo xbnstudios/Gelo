@@ -65,7 +65,7 @@ class Marker(object):
         return "Marker(%s, %s, %s,  %s, %s, %s)" % (
             self.label,
             self.artist,
-            self.track,
+            self.title,
             self.time,
             self.special,
             self.url,
