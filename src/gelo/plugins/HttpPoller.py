@@ -20,13 +20,15 @@ class Track:
 def icecast_status_to_track(status: dict) -> Optional[Track]:
     if "icestats" not in status:
         return None
-    if "source" not in status.icestats:
+    icestats = status["icestats"]
+    if "source" not in icestats:
         return None
-    if "artist" not in status.icestats.source:
+    source = icestats["source"]
+    if "artist" not in source:
         return None
-    if "title" not in status.icestats.source:
+    if "title" not in source:
         return None
-    return Track(status.icestats.source.artist, status.icestats.source.title)
+    return Track(source["artist"], source["title"])
 
 
 class HttpPoller(arch.IMarkerSource):
@@ -64,7 +66,7 @@ class HttpPoller(arch.IMarkerSource):
                 self.log.info("invalid JSON returned by server:", jde)
                 continue
             if (
-                track == self.last_marker
+                track == self.last_track
                 or track.artist.strip() == ""
                 or track.title.strip() == ""
             ):
@@ -73,7 +75,7 @@ class HttpPoller(arch.IMarkerSource):
             m = arch.Marker(str(track), track.artist, track.title)
             m.special = self.check_prefix_file()
             self.mediator.publish(arch.MarkerType.TRACK, m)
-            self.last_marker = track
+            self.last_track = track
 
     def poll_server(self) -> dict:
         """Connect to the HTTP server and request the current track.
