@@ -1,5 +1,7 @@
 import re
+import logging
 import requests
+import dataclasses
 import requests.exceptions
 from typing import Optional
 from typing import Tuple
@@ -17,6 +19,27 @@ def match_artist_track(text: str) -> Optional[Tuple[str, str]]:
         return None
 
 
+@dataclasses.dataclass
+class Track:
+    artist: str = ""
+    title: str = ""
+
+    def __str__(self):
+        return f"{self.artist} — {self.title}"
+
+
+def icecast_status_to_track(status: dict) -> Optional[Track]:
+    if "icestats" not in status:
+        return None
+    if "source" not in status.icestats:
+        return None
+    if "artist" not in status.icestats.source:
+        return None
+    if "title" not in status.icestats.source:
+        return None
+    return Track(status.icestats.source.artist, status.icestats.source.title)
+
+
 class HttpPoller(arch.IMarkerSource):
     """Poll an HTTP server of some description for markers."""
 
@@ -25,7 +48,8 @@ class HttpPoller(arch.IMarkerSource):
     def __init__(self, config, mediator: arch.IMediator, show: str):
         """Create a new instance of HttpPoller."""
         super().__init__(config, mediator, show)
-        self.last_marker = ""
+        self.log = logging.getLogger("gelo.plugins.HttpPoller")
+        self.last_track = Track()
         self.config_test()
         self.poll_url = self.config["poll_url"]
         self.prefix_file = self.config["prefix_file"]
@@ -35,31 +59,38 @@ class HttpPoller(arch.IMarkerSource):
     def run(self):
         """Run the code that creates markers from the HTTP server.
         This should be run as a thread."""
+        self.log.info("now running")
         starttime = time()
         while not self.should_terminate:
             sleep(0.25 - ((time() - starttime) % 0.25))
             if not self.is_enabled:
                 continue
             try:
-                track = self.poll_server()
-            except requests.exceptions.ConnectionError:
+                icecast_status = self.poll_server()
+                track = icecast_status_to_track(icecast_status)
+            except requests.exceptions.ConnectionError as ce:
+                self.log.info("connection error while polling server:", ce)
                 continue
-            if track == self.last_marker or track.strip() == "":
+            except requests.exceptions.JSONDecodeError as jde:
+                self.log.info("invalid JSON returned by server:", jde)
                 continue
-            artist_track = match_artist_track(track)
-            if artist_track:
-                m = arch.Marker(track, artist_track[0], artist_track[1])
-            else:
-                m = arch.Marker(track)
+            if (
+                track == self.last_marker
+                or track.artist.strip() == ""
+                or track.title.strip() == ""
+            ):
+                self.log.info("ignoring empty track metadata")
+                continue
+            m = arch.Marker(str(track), track.artist, track.title)
             m.special = self.check_prefix_file()
             self.mediator.publish(arch.MarkerType.TRACK, m)
             self.last_marker = track
 
-    def poll_server(self) -> str:
+    def poll_server(self) -> dict:
         """Connect to the HTTP server and request the current track.
         :return: Whatever the server responded with
         """
-        return requests.get(self.poll_url).text.strip()
+        return requests.get(self.poll_url).json()
 
     def check_prefix_file(self) -> str:
         """Check the prefix file to see if the track needs a special prefix.
