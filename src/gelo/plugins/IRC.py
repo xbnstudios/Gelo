@@ -6,6 +6,7 @@ import ssl
 import queue
 import logging
 import irc.client
+import functools
 
 
 class IRC(gelo.arch.IMarkerSink):
@@ -66,7 +67,12 @@ class IRC(gelo.arch.IMarkerSink):
         self.log.debug("Plugin started")
         reactor = irc.client.Reactor()
         try:
-            wrapper = ssl.wrap_socket if self.tls else irc.client.connection.identity
+            wrapper = irc.client.connection.identity
+            if self.tls:
+                ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                wrapper = functools.partial(
+                    ctx.wrap_socket, server_hostname=self.server
+                )
             factory = irc.client.connection.Factory(ipv6=self.ipv6, wrapper=wrapper)
             self.log.debug(
                 "Attempting to connect to %s:%s with nick %s"
@@ -162,14 +168,14 @@ class IRC(gelo.arch.IMarkerSink):
         else:
             if type(self.config["tls"]) is not bool:
                 errors.append(
-                    "[plugin:irc] must have a boolean value for the " 'key "tls"'
+                    '[plugin:irc] must have a boolean value for the key "tls"'
                 )
         if "ipv6" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "ipv6"')
         else:
             if type(self.config["ipv6"]) is not bool:
                 errors.append(
-                    "[plugin:irc] must have a boolean value for the " 'key "tls"'
+                    '[plugin:irc] must have a boolean value for the key "tls"'
                 )
         if "send_to" not in self.config.keys():
             errors.append('[plugin:irc] is missing the required key "send_to"')

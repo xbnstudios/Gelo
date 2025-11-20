@@ -46,7 +46,7 @@ class HttpPoller(arch.IMarkerSource):
                 continue
             if track == self.last_marker or track.strip() == "":
                 continue
-            artist_track = self.match_artist_track(track)
+            artist_track = match_artist_track(track)
             if artist_track:
                 m = arch.Marker(track, artist_track[0], artist_track[1])
             else:
