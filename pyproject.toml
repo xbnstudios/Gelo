@@ -1,6 +1,6 @@
 [project]
 name = "gelo"
-version = "6.0.3"
+version = "6.0.5"
 description = "podcast chapter metadata gathering tool for podcast creators"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -20,4 +20,5 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "responses>=0.25.8",
 ]

@@ -1,11 +1,11 @@
 import re
+import time
 import logging
 import requests
 import dataclasses
 import requests.exceptions
-from typing import Optional
+from typing import Optional, Callable
 from gelo import arch, conf
-from time import time, sleep
 
 
 @dataclasses.dataclass
@@ -18,17 +18,34 @@ class Track:
 
 
 def icecast_status_to_track(status: dict) -> Optional[Track]:
-    if "icestats" not in status:
+    if type(status) is not dict or "icestats" not in status:
         return None
     icestats = status["icestats"]
-    if "source" not in icestats:
+    if type(icestats) is not dict or "source" not in icestats:
         return None
     source = icestats["source"]
+    if type(source) is not dict:
+        return None
     if "artist" not in source:
         return None
     if "title" not in source:
         return None
-    return Track(source["artist"], source["title"])
+    return Track(str(source["artist"]), str(source["title"]))
+
+
+def do_every(
+    period: float, keep_going: Callable[[], bool], fn: Callable, *args, **kwargs
+):
+    def g_tick():
+        t = time.time()
+        while True:
+            t += period
+            yield max(t - time.time(), 0)
+
+    g = g_tick()
+    while keep_going():
+        time.sleep(next(g))
+        fn(*args, **kwargs)
 
 
 class HttpPoller(arch.IMarkerSource):
@@ -51,31 +68,37 @@ class HttpPoller(arch.IMarkerSource):
         """Run the code that creates markers from the HTTP server.
         This should be run as a thread."""
         self.log.info("now running")
-        starttime = time()
-        while not self.should_terminate:
-            sleep(0.25 - ((time() - starttime) % 0.25))
-            if not self.is_enabled:
-                continue
-            try:
-                icecast_status = self.poll_server()
-                track = icecast_status_to_track(icecast_status)
-            except requests.exceptions.ConnectionError as ce:
-                self.log.info("connection error while polling server:", ce)
-                continue
-            except requests.exceptions.JSONDecodeError as jde:
-                self.log.info("invalid JSON returned by server:", jde)
-                continue
-            if (
-                track == self.last_track
-                or track.artist.strip() == ""
-                or track.title.strip() == ""
-            ):
-                self.log.info("ignoring empty track metadata")
-                continue
-            m = arch.Marker(str(track), track.artist, track.title)
-            m.special = self.check_prefix_file()
-            self.mediator.publish(arch.MarkerType.TRACK, m)
-            self.last_track = track
+        starttime = time.time()
+
+        def keep_going():
+            return not self.should_terminate
+
+        do_every(0.25, keep_going, self.run_cycle, starttime)
+
+    def run_cycle(self, start_time: time.time):
+        if not self.is_enabled:
+            return
+        try:
+            icecast_status = self.poll_server()
+            track = icecast_status_to_track(icecast_status)
+        except requests.exceptions.ConnectionError as ce:
+            self.log.info("connection error while polling server:", ce)
+            return
+        except requests.exceptions.JSONDecodeError as jde:
+            self.log.info("invalid JSON returned by server:", jde)
+            return
+        if (
+            not track
+            or track == self.last_track
+            or track.artist.strip() == ""
+            or track.title.strip() == ""
+        ):
+            self.log.info("ignoring empty track metadata")
+            return
+        m = arch.Marker(str(track), track.artist, track.title)
+        m.special = self.check_prefix_file()
+        self.mediator.publish(arch.MarkerType.TRACK, m)
+        self.last_track = track
 
     def poll_server(self) -> dict:
         """Connect to the HTTP server and request the current track.
