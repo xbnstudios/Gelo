@@ -69,6 +69,7 @@ class SomaFM(arch.IMarkerSource):
         else:
             self.log.warning("unsupported stream protocol; terminating")
             self.should_terminate = True
+            return
         self.http_client.request("GET", parsed_url.path, headers=self.HEADERS)
         self.http_resp = self.http_client.getresponse()
         if self.http_resp is None:
@@ -82,7 +83,8 @@ class SomaFM(arch.IMarkerSource):
     def teardown_connection(self):
         """Disconnect from the configured stream."""
         self.log.debug("tearing down connection")
-        self.http_client.close()
+        if self.http_client is not None:
+            self.http_client.close()
 
     def next_track(self) -> Optional[str]:
         """Get the next track.
@@ -90,6 +92,11 @@ class SomaFM(arch.IMarkerSource):
         :returns: A string of the next track, or ``None`` if it hasn't
         changed yet.
         """
+        if self.http_resp is None:
+            self.log.warning(
+                "http_resp is null, so next_track was called before the connection was set up"
+            )
+            return None
         _ = self.http_resp.read(self.metadata_interval)
         size_byte = ord(self.http_resp.read(1))
         metadata_size = size_byte * 16

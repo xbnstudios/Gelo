@@ -92,7 +92,7 @@ class IRC(gelo.arch.IMarkerSink):
         except irc.client.ServerConnectionError:
             self.log.critical("IRC connection error: " + str(sys.exc_info()[1]))
 
-    def main_once(self, connection: irc.client.connection, timeout=0.2):
+    def main_once(self, connection: irc.client.ServerConnection, timeout=0.2):
         """Fetch new markers from the queue and send them in IRC.
 
         :param connection: The connection to the IRC server to send messages
@@ -117,7 +117,7 @@ class IRC(gelo.arch.IMarkerSink):
             self.should_terminate = True
             connection.quit(message="Metadata system shutdown")
 
-    def send_message(self, marker: gelo.arch.Marker, c: irc.client.connection):
+    def send_message(self, marker: gelo.arch.Marker, c: irc.client.ServerConnection):
         """Use the provided connection to send a message (or several,
         if configured) about the provided marker.
         :param marker: The marker to message about.

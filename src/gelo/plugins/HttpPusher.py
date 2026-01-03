@@ -49,7 +49,7 @@ class HttpPusher(gelo.arch.IMarkerSink):
             raise_on_status=True,
             # False makes sure this retries for every method type, not just the
             # "safe" ones.
-            allowed_methods=False,
+            allowed_methods=None,
         )
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
@@ -137,10 +137,17 @@ class HttpPusher(gelo.arch.IMarkerSink):
                         data=payload,
                         timeout=self.HTTP_TIMEOUT_SECS,
                     )
-                r.raise_for_status()
-                self.log.info("Request to {} made successfully.".format(webhook_name))
-                self.log.debug("Response data: {}".format(r.content))
-                break
+                else:
+                    self.log.error(
+                        f"Unsupported webhook method: {webhook_options['method']}"
+                    )
+                if r is not None:
+                    r.raise_for_status()
+                    self.log.info(
+                        "Request to {} made successfully.".format(webhook_name)
+                    )
+                    self.log.debug("Response data: {}".format(r.content))
+                    break
             except requests.ConnectionError as ce:
                 self.log.warning(
                     "Connection Error while trying to make a request to"

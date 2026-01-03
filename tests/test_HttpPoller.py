@@ -1,6 +1,5 @@
 import responses
 import requests
-import unittest
 from responses.registries import OrderedRegistry
 from unittest import mock
 from gelo.plugins import HttpPoller
@@ -50,7 +49,7 @@ def icestats(artist: str, title: str) -> dict:
     }
 
 
-def check_marker(expected: (str, str, str), actual):
+def check_marker(expected: tuple[str, str, str], actual):
     assert len(actual.args) == 2
     assert actual.args[0] == arch.MarkerType.TRACK
     marker = actual.args[1]

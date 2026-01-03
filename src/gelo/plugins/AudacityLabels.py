@@ -34,7 +34,7 @@ class AudacityLabels(arch.IMarkerSink):
                     continue
                 self.log.debug("Received marker from channel: %s" % current_marker)
                 if self.last_marker is not None:
-                    line = self.create_line(current_marker)
+                    line = self.create_line(current_marker, self.last_marker)
                     with open(self.filename, "a") as f:
                         f.write(line)
                     self.last_marker = current_marker
@@ -44,6 +44,8 @@ class AudacityLabels(arch.IMarkerSink):
             except queue.Empty:
                 continue
             except mediator.UnsubscribeException:
+                self.should_terminate = True
+            except StopIteration:
                 self.should_terminate = True
         if self.last_marker is not None:
             self.log.info("Writing final marker to file")
@@ -55,13 +57,16 @@ class AudacityLabels(arch.IMarkerSink):
                         label=self.last_marker.label,
                     )
                 )
+                f.flush()
+        else:
+            self.log.warning("not writing final marker to file because it was None")
 
-    def create_line(self, marker: arch.Marker) -> str:
+    def create_line(self, marker: arch.Marker, prev_marker: arch.Marker) -> str:
         """Create a line for the file using the current marker and the last one."""
         return self.LINE_TEMPLATE.format(
-            start=self.last_marker.time,
+            start=prev_marker.time,
             finish=marker.time,
-            label=self.last_marker.label,
+            label=prev_marker.label,
         )
 
     def avoid_overwrite_filename(self) -> str:
@@ -78,9 +83,7 @@ class AudacityLabels(arch.IMarkerSink):
         # If there is no collision avoidance marker, write another entry that
         # says the program was restarted.
         if "{count}" not in self.config["path"]:
-            self.log.info(
-                "Data file path missing {count} tag, writing restart " "marker"
-            )
+            self.log.info("Data file path missing {count} tag, writing restart marker")
             with open(self.config["path"], "a") as f:
                 f.write(
                     self.LINE_TEMPLATE.format(
@@ -107,7 +110,7 @@ class AudacityLabels(arch.IMarkerSink):
         else:
             self.config["path"] = os.path.expandvars(self.config["path"])
         if "delayed" not in self.config.keys():
-            self.config["delayed"] = False
+            self.config["delayed"] = "False"
         else:
             if type(self.config["delayed"]) is not bool:
                 errors.append(

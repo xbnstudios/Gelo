@@ -367,5 +367,7 @@ class GeloShell(cmd.Cmd):
 
     def completedefault(self, text, line, begidx, endidx):
         return [
-            macro for macro in self.macros["macros"].keys() if macro.startsiwth(text)
+            macro
+            for macro in self.macros["macros"].keys()
+            if macro is str and macro.startsiwth(text)
         ]

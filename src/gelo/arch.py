@@ -44,7 +44,7 @@ class MarkerType(Enum):
 
 
 # A type for a list of MarkerType
-MarkerTypeList = [MarkerType]
+MarkerTypeList = list[MarkerType]
 
 
 class Marker(object):

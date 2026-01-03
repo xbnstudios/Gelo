@@ -3,7 +3,19 @@ import queue
 import logging
 from time import time
 from threading import Lock, Timer
-from functools import partial
+
+
+class ListenableQueue(queue.Queue):
+    def listen(self, block=True, timeout=None):
+        """Retrieve the next item from a queue."""
+        while True:
+            try:
+                data = self.get(block=block, timeout=timeout)
+            except queue.Empty:
+                return
+            if data is None:
+                raise UnsubscribeException()
+            yield data
 
 
 class Mediator(gelo.arch.IMediator):
@@ -89,7 +101,7 @@ class Mediator(gelo.arch.IMediator):
 
     def subscribe(
         self, marker_types: gelo.arch.MarkerTypeList, subscriber: str, delayed=False
-    ) -> queue.Queue:
+    ) -> ListenableQueue:
         """Subscribe to all of the listed event types.
         :param marker_types: A list of MarkerType types to subscribe to.
         :param subscriber: The class name of the subscriber.
@@ -104,8 +116,7 @@ class Mediator(gelo.arch.IMediator):
         if not subscriber:
             raise ValueError()
         self.log.info("New subscriber to %s: %s" % (marker_types, subscriber))
-        q = queue.Queue()
-        q.listen = partial(self.listen, q)
+        q = ListenableQueue()
         if delayed:
             for marker_type in marker_types:
                 if marker_type not in self.delayed_channels:
@@ -151,18 +162,6 @@ class Mediator(gelo.arch.IMediator):
         self.subscriber_lock.acquire()
         self.subscriber_map[subscriber].put(None, block=False)
         self.subscriber_lock.release()
-
-    @staticmethod
-    def listen(q: queue.Queue, block=True, timeout=None):
-        """Retrieve the next item from a queue."""
-        while True:
-            try:
-                data = q.get(block=block, timeout=timeout)
-            except queue.Empty:
-                return
-            if data is None:
-                raise UnsubscribeException()
-            yield data
 
 
 class UnsubscribeException(Exception):

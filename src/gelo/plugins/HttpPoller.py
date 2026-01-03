@@ -17,7 +17,7 @@ class Track:
         return f"{self.artist} — {self.title}"
 
 
-def icecast_status_to_track(status: dict) -> Optional[Track]:
+def icecast_status_to_track(status) -> Optional[Track]:
     if type(status) is not dict or "icestats" not in status:
         return None
     icestats = status["icestats"]
@@ -75,17 +75,17 @@ class HttpPoller(arch.IMarkerSource):
 
         do_every(0.25, keep_going, self.run_cycle, starttime)
 
-    def run_cycle(self, start_time: time.time):
+    def run_cycle(self, _):
         if not self.is_enabled:
             return
         try:
             icecast_status = self.poll_server()
             track = icecast_status_to_track(icecast_status)
         except requests.exceptions.ConnectionError as ce:
-            self.log.info("connection error while polling server:", ce)
+            self.log.info("connection error while polling server: %s", ce)
             return
         except requests.exceptions.JSONDecodeError as jde:
-            self.log.info("invalid JSON returned by server:", jde)
+            self.log.info("invalid JSON returned by server: %s", jde)
             return
         if (
             not track
@@ -106,7 +106,7 @@ class HttpPoller(arch.IMarkerSource):
         """
         return requests.get(self.poll_url).json()
 
-    def check_prefix_file(self) -> str:
+    def check_prefix_file(self) -> str | None:
         """Check the prefix file to see if the track needs a special prefix.
         :return: The prefix, or None if there shouldn't be one."""
         try:

@@ -9,7 +9,9 @@ from unittest.mock import Mock
 
 
 @dataclass
-class TestCase:
+class XTestCase:
+    """The X is so that pytest doesn't try to collect it."""
+
     input: Tuple = ()
     output = None
 
@@ -80,18 +82,18 @@ class TestHttpPusher:
         ex_artist = "Saint Motel"
         ex_title = "Van Horn"
         tests = [
-            TestCase(
+            XTestCase(
                 input=(mock_options(marker_param="np"), Marker(ex_label)),
                 output={"np": ex_label},
             ),
-            TestCase(
+            XTestCase(
                 input=(
                     mock_options(artist_param="artist", title_param="title"),
                     Marker(ex_label, ex_artist, ex_title),
                 ),
                 output={"artist": ex_artist, "title": ex_title},
             ),
-            TestCase(
+            XTestCase(
                 input=(
                     mock_options(artist_param="artist", title_param="title"),
                     Marker(ex_label),
