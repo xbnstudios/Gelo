@@ -77,7 +77,14 @@ class SomaFM(arch.IMarkerSource):
                 "HTTP response was None. Is the stream configured properly?"
             )
             self.should_terminate = True
-        self.metadata_interval = int(self.http_resp.getheader("Icy-MetaInt"))
+        metadata_interval_str = self.http_resp.getheader("Icy-MetaInt")
+        if metadata_interval_str is None:
+            self.log.error(
+                "Stream source does not support Icecast metadata; this plugin cannot work correctly."
+            )
+            self.should_terminate = True
+            return
+        self.metadata_interval = int(metadata_interval_str)
         self.log.debug("metadata interval: " + str(self.metadata_interval) + " bytes")
 
     def teardown_connection(self):

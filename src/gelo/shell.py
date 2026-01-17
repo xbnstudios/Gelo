@@ -365,7 +365,10 @@ class GeloShell(cmd.Cmd):
         macros = [a for a in self.macros["macros"].keys() if a.startswith(text)]
         return commands + macros
 
-    def completedefault(self, text, line, begidx, endidx):
+    def completedefault(self, *ignored) -> list[str]:
+        text = ""
+        if len(ignored) > 0:
+            text = ignored[0]
         return [
             macro
             for macro in self.macros["macros"].keys()

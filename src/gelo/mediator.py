@@ -39,16 +39,16 @@ class Mediator(gelo.arch.IMediator):
         self.log = logging.getLogger("gelo.mediator")
 
     def publish(
-        self, marker_type: gelo.arch.MarkerType, marker: gelo.arch.Marker
+        self, event_type: gelo.arch.MarkerType, event: gelo.arch.Marker
     ) -> None:
         """Publish a new event to all applicable subscribers.
         :marker_type: The EventType corresponding to the event
         :marker: The marker to publish"""
-        if not marker_type:
+        if not event_type:
             raise ValueError()
-        if not marker:
+        if not event:
             raise ValueError()
-        self.log.info("Received new marker: %s" % marker)
+        self.log.info("Received new marker: %s" % event)
         if self.shouldSquelchNext:
             self.log.debug("Ignoring marker because squelch")
             self.shouldSquelchNext = False
@@ -60,21 +60,21 @@ class Mediator(gelo.arch.IMediator):
             t = time()
             self.log.debug("First time is none. Setting to %s" % t)
             self.first_time = t
-        marker.time = time() - self.first_time
-        delay = Timer(self.broadcast_delay, self._publish, args=[marker_type, marker])
+        event.time = time() - self.first_time
+        delay = Timer(self.broadcast_delay, self._publish, args=[event_type, event])
         delay.start()
         self.log.info("Broadcast delay started.")
-        if marker_type not in self.instant_channels:
+        if event_type not in self.instant_channels:
             self.instant_channel_lock.acquire()
-            if marker_type not in self.instant_channels:
-                self.instant_channels[marker_type] = []
+            if event_type not in self.instant_channels:
+                self.instant_channels[event_type] = []
             self.instant_channel_lock.release()
-        self.log.debug("Pushing marker to instant queues for %s" % marker_type)
-        for q in self.instant_channels[marker_type]:
+        self.log.debug("Pushing marker to instant queues for %s" % event_type)
+        for q in self.instant_channels[event_type]:
             if q.qsize() > self.QUEUE_MAX:
                 q.put(None, block=False)
                 continue
-            q.put(marker, block=False)
+            q.put(event, block=False)
 
     def _publish(
         self, marker_type: gelo.arch.MarkerType, marker: gelo.arch.Marker
@@ -100,7 +100,7 @@ class Mediator(gelo.arch.IMediator):
             q.put(marker, block=False)
 
     def subscribe(
-        self, marker_types: gelo.arch.MarkerTypeList, subscriber: str, delayed=False
+        self, event_types: gelo.arch.MarkerTypeList, subscriber: str, delayed=False
     ) -> ListenableQueue:
         """Subscribe to all of the listed event types.
         :param marker_types: A list of MarkerType types to subscribe to.
@@ -109,16 +109,16 @@ class Mediator(gelo.arch.IMediator):
         they are published, or after the configured broadcast delay.
         :return: A queue of markers
         """
-        if not marker_types:
+        if not event_types:
             raise ValueError()
-        if len(marker_types) < 1:
+        if len(event_types) < 1:
             raise ValueError()
         if not subscriber:
             raise ValueError()
-        self.log.info("New subscriber to %s: %s" % (marker_types, subscriber))
+        self.log.info("New subscriber to %s: %s" % (event_types, subscriber))
         q = ListenableQueue()
         if delayed:
-            for marker_type in marker_types:
+            for marker_type in event_types:
                 if marker_type not in self.delayed_channels:
                     self.delayed_channel_lock.acquire()
                     if marker_type not in self.delayed_channels:
@@ -126,7 +126,7 @@ class Mediator(gelo.arch.IMediator):
                     self.delayed_channel_lock.release()
                 self.delayed_channels[marker_type].append(q)
         else:
-            for marker_type in marker_types:
+            for marker_type in event_types:
                 if marker_type not in self.instant_channels:
                     self.instant_channel_lock.acquire()
                     if marker_type not in self.instant_channels:
