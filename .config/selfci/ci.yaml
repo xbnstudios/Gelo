@@ -1,0 +1,13 @@
+job:
+  command: .config/selfci/ci.sh
+  clone-mode: partial
+
+# Merge queue configuration (optional)
+# mq:
+#   # Default base branch for merge queue
+#   base-branch: main
+#
+#   # Merge style: "rebase" or "merge" (default: rebase)
+#   # - rebase: Rebase candidate commits on top of base branch (no merge commit)
+#   # - merge: Create a merge commit
+#   merge-style: rebase
