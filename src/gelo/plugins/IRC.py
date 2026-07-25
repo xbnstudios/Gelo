@@ -45,9 +45,7 @@ class IRC(gelo.arch.IMarkerSink):
 
     def on_connect(self, connection, event):
         self.log.debug("Finished connecting to IRC")
-        if self.nickserv_enable:
-            connection.privmsg("nickserv", "identify %s" % self.nickserv_pass)
-            self.log.debug("Sent NickServ auth message")
+        connection.mode(self.nick, "+BN")
         if irc.client.is_channel(self.send_to):
             self.log.debug("Joining output channel")
             connection.join(self.send_to)
@@ -79,7 +77,12 @@ class IRC(gelo.arch.IMarkerSink):
                 % (self.server, self.port, self.nick)
             )
             c = reactor.server().connect(
-                self.server, self.port, self.nick, connect_factory=factory
+                self.server,
+                self.port,
+                self.nick,
+                password=self.nickserv_pass,
+                connect_factory=factory,
+                sasl_login=self.nick if self.nickserv_enable else None,
             )
             self.log.debug("Connected!")
             c.add_global_handler("welcome", self.on_connect)

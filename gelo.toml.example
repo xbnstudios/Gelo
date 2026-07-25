@@ -55,7 +55,9 @@ path="$HOME/Desktop/np.txt"
 nick="gelo"
 # nickserv_pass
 # The password to use when authenticating with NickServ. Comment out this key
-# if you don't need that feature.
+# if you don't need that feature. This used to PRIVMSG NickServ, but it now
+# attempts SASL PLAIN authentication upon connecting. The NickServ username
+# must be the same as the nick.
 #nickserv_pass="secret"
 # server
 # The IRC server to connect to
