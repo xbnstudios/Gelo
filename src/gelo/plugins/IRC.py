@@ -110,7 +110,11 @@ class IRC(gelo.arch.IMarkerSink):
             if not self.is_enabled:
                 return
             self.log.debug("Received marker from channel: %s" % marker)
-            self.send_message(marker, connection)
+            try:
+                self.send_message(marker, connection)
+            except (irc.client.IRCError, ValueError, OSError) as e:
+                # Brought to you by https://00000ooooo.bandcamp.com/album/--5
+                self.log.warning("Failed to send IRC message because: %s" % e)
         except StopIteration:
             return
         except queue.Empty:
