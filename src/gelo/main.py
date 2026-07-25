@@ -11,8 +11,6 @@ from gelo.plugins import (
     HttpPusher,
     IRC,
     NowPlayingFile,
-    OneEightyOneFM,
-    SomaFM,
 )
 
 
@@ -34,8 +32,6 @@ class GeloPluginManager:
             HttpPusher.HttpPusher,
             IRC.IRC,
             NowPlayingFile.NowPlayingFile,
-            OneEightyOneFM.OneEightyOneFM,
-            SomaFM.SomaFM,
         ]
 
     def instantiatePlugin(self, element, element_name):
